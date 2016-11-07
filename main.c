@@ -102,6 +102,9 @@ void drawBall();
 /** Draw a simple wireframe sky sphere - for testing purposes */
 void drawSkySphere();
 
+/** Draws coordinate system arrow helper */
+void drawCoordinateSystem();
+
 
 /** Calculate input events */
 void calculateInput();
@@ -148,8 +151,8 @@ void initProgram(int* argc, char** argv) {
     arguments     = argv;
 
     windowName = newString("Window name");
-    windowWidth  = 640;
-    windowHeight = 480;
+    windowWidth  = 800;
+    windowHeight = 600;
     aspectRatio  = calculateAspectRatio(windowWidth, windowHeight);
 }
 
@@ -167,7 +170,7 @@ void initCamera() {
     camera.rotation.z = 0.0;
 
     camera.fov      = 60.0;
-    camera.clipNear = 0.1;
+    camera.clipNear = 0.01;
     camera.clipFar  = 100.0;
 }
 
@@ -320,6 +323,63 @@ void drawSkySphere() {
         glRotatef(90, 1, 0, 0);
         glLineWidth(1.0);
         glutWireSphere(10, 20, 10);
+    glPopMatrix();
+}
+
+void drawCoordinateSystem() {
+    float size   = 1.0;
+    float offset = 0.001;
+
+    glLineWidth(3.0);
+    glBegin(GL_LINES);
+        /* X arrow line */
+        glColor3f( 0.4,  0.0,    0.0);
+        glVertex3f(0.0,  offset, 0.0);
+        glVertex3f(size, offset, 0.0);
+
+        /* Y arrow line */
+        glColor3f( 0.0, 0.4,           0.0);
+        glVertex3f(0.0, offset,        0.0);
+        glVertex3f(0.0, size + offset, 0.0);
+
+        /* Z arrow line */
+        glColor3f( 0.0, 0.0, 0.4);
+        glVertex3f(0.0, offset, 0.0);
+        glVertex3f(0.0, offset, size);
+    glEnd();
+    glLineWidth(1.0);
+
+    /* X arrow head */
+    glColor3f(0.4, 0.0, 0.0);
+    glPushMatrix();
+        glTranslatef(size*0.9, 0, 0);
+
+        glRotatef(45, 1, 0, 0);
+        glScalef(2.0, 0.5, 0.5);
+        glRotatef(45, 0, 1, 0);
+        glutSolidCube(size*0.1);
+    glPopMatrix();
+
+    /* Y arrow head */
+    glColor3f(0.0, 0.4, 0.0);
+    glPushMatrix();
+        glTranslatef(0, size*0.9, 0);
+
+        glRotatef(45, 0, 1, 0);
+        glScalef(0.5, 2.0, 0.5);
+        glRotatef(45, 0, 0, 1);
+        glutSolidCube(size*0.1);
+    glPopMatrix();
+
+    /* Z arrow head */
+    glColor3f(0.0, 0.0, 0.4);
+    glPushMatrix();
+        glTranslatef(0, 0, size*0.9);
+
+        glRotatef(45, 0, 0, 1);
+        glScalef(0.5, 0.5, 2.0);
+        glRotatef(45, 1, 0, 0);
+        glutSolidCube(size*0.1);
     glPopMatrix();
 }
 
@@ -538,22 +598,7 @@ void displayScene() {
               camera.position.x + camera.look.x,  camera.position.y + camera.look.y,  camera.position.z + camera.look.z,
               0.0,                                1.0,                                0.0);
 
-    /* Draw coord system */
-    glLineWidth(3.0);
-    glBegin(GL_LINES);
-      glColor3f(0.4, 0.0, 0.0);
-      glVertex3f(0.0, 0.001, 0.0);
-      glVertex3f(1.0, 0.001, 0.0);
-
-      glColor3f(0.0, 0.4, 0.0);
-      glVertex3f(0.0, 0.001, 0.0);
-      glVertex3f(0.0, 1.001, 0.0);
-
-      glColor3f(0.0, 0.0, 0.4);
-      glVertex3f(0.0, 0.001, 0.0);
-      glVertex3f(0.0, 0.001, 1.0);
-    glEnd();
-    glLineWidth(1.0);
+    drawCoordinateSystem();
 
     drawObjects();
 
