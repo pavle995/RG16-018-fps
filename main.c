@@ -38,6 +38,15 @@ int    windowWidth;
 int    windowHeight;
 float  aspectRatio;
 
+int key_w = 0;
+int key_s = 0;
+int key_a = 0;
+int key_d = 0;
+int key_up    = 0;
+int key_down  = 0;
+int key_left  = 0;
+int key_right = 0;
+
 Camera camera;
 
 Object** objects;
@@ -94,14 +103,23 @@ void drawBall();
 void drawSkySphere();
 
 
+/** Calculate input events */
+void calculateInput();
+
 /** Calculates aspect ratio */
 float calculateAspectRatio(int width, int height);
 
-/** Handles basic ascii keyboard character press events */
+/** Handles basic ascii keyboard character press key states */
 void keyboardBasicPress(unsigned char key, int mouseX, int mouseY);
 
-/** Handles special keyboard character press events */
+/** Handles basic ascii keyboard character release key states */
+void keyboardBasicRelease(unsigned char key, int mouseX, int mouseY);
+
+/** Handles special keyboard character press key states */
 void keyboardSpecialPress(int key, int mouseX, int mouseY);
+
+/** Handles special keyboard character release key states */
+void keyboardSpecialRelease(int key, int mouseX, int mouseY);
 
 /** Renders the 3D scene */
 void displayScene();
@@ -232,7 +250,7 @@ void initWorld() {
     objects[3] = createObject(tmpTranslation, tmpRotation, tmpScale, drawTeapot);
 
     /* Box object */
-    setVec3f(tmpTranslation, -1.45, 1.05, -0.85);
+    setVec3f(tmpTranslation, -1.75, 1.05, -1.0);
     setVec3f(tmpRotation,     0,    70,    0);
     setVec3f(tmpScale,        0.1,  0.1,   0.1);
     objects[4] = createObject(tmpTranslation, tmpRotation, tmpScale, drawBox);
@@ -324,13 +342,15 @@ void initGlut() {
 
     /* Register GLUT callback functions */
     glutKeyboardFunc(keyboardBasicPress);
+    glutKeyboardUpFunc(keyboardBasicRelease);
     glutSpecialFunc(keyboardSpecialPress);
+    glutSpecialUpFunc(keyboardSpecialRelease);
     glutDisplayFunc(displayScene);
     glutIdleFunc(displayScene);
     glutReshapeFunc(resizeWindow);
 
     /* Set GLUT states */
-    glutIgnoreKeyRepeat(0);
+    glutIgnoreKeyRepeat(1);
 }
 
 void startGlut() {
@@ -338,29 +358,37 @@ void startGlut() {
 }
 
 void keyboardBasicPress(unsigned char key, int mouseX, int mouseY) {
-    float step = 0.05;
     switch (key) {
         case 'w':
-            /* Move camera forward */
-            camera.position.x += camera.look.x * step;
-            camera.position.y += camera.look.y * step;
-            camera.position.z += camera.look.z * step;
+            key_w = 1;
             break;
         case 's':
-            /* Move camera backward */
-            camera.position.x -= camera.look.x * step;
-            camera.position.y -= camera.look.y * step;
-            camera.position.z -= camera.look.z * step;
+            key_s = 1;
             break;
         case 'a':
-            /* Move camera to the left side */
-            camera.position.z -= camera.look.x * step;
-            camera.position.x += camera.look.z * step;
+            key_a = 1;
             break;
         case 'd':
-            /* Move camera to the right side */
-            camera.position.z += camera.look.x * step;
-            camera.position.x -= camera.look.z * step;
+            key_d = 1;
+            break;
+    }
+
+    glutPostRedisplay();
+}
+
+void keyboardBasicRelease(unsigned char key, int mouseX, int mouseY) {
+    switch (key) {
+        case 'w':
+            key_w = 0;
+            break;
+        case 's':
+            key_s = 0;
+            break;
+        case 'a':
+            key_a = 0;
+            break;
+        case 'd':
+            key_d = 0;
             break;
     }
 
@@ -368,26 +396,91 @@ void keyboardBasicPress(unsigned char key, int mouseX, int mouseY) {
 }
 
 void keyboardSpecialPress(int key, int mouseX, int mouseY) {
-    float turn = 10;
     switch (key) {
-        case GLUT_KEY_RIGHT:
-            /* Turn the camera to the right */
-            camera.rotation.x += turn;
-            break;
-        case GLUT_KEY_LEFT:
-            /* Turn the camera to the left */
-            camera.rotation.x -= turn;
+        case GLUT_KEY_UP:
+            key_up = 1;
             break;
         case GLUT_KEY_DOWN:
-            /* Turn the camera up */
-            camera.rotation.y += turn;
+            key_down = 1;
             break;
-        case GLUT_KEY_UP:
-            /* Turn the camera down */
-            camera.rotation.y -= turn;
+        case GLUT_KEY_LEFT:
+            key_left = 1;
             break;
+        case GLUT_KEY_RIGHT:
+            key_right = 1;
+            break;
+    }
 
-        glutPostRedisplay();
+    glutPostRedisplay();
+}
+
+void keyboardSpecialRelease(int key, int mouseX, int mouseY) {
+    switch (key) {
+        case GLUT_KEY_UP:
+            key_up = 0;
+            break;
+        case GLUT_KEY_DOWN:
+            key_down = 0;
+            break;
+        case GLUT_KEY_LEFT:
+            key_left = 0;
+            break;
+        case GLUT_KEY_RIGHT:
+            key_right = 0;
+            break;
+    }
+
+    glutPostRedisplay();
+}
+
+void calculateInput() {
+    float step = 0.05;
+    float turn = 2;
+
+    /* Move camera forward */
+    if (key_w == 1 && key_s == 0) {
+        camera.position.x += camera.look.x * step;
+        camera.position.y += camera.look.y * step;
+        camera.position.z += camera.look.z * step;
+    }
+
+    /* Move camera backward */
+    if (key_s == 1 && key_w == 0) {
+        camera.position.x -= camera.look.x * step;
+        camera.position.y -= camera.look.y * step;
+        camera.position.z -= camera.look.z * step;
+    }
+
+    /* Move camera to the left side */
+    if (key_a == 1 && key_d == 0) {
+        camera.position.z -= camera.look.x * step;
+        camera.position.x += camera.look.z * step;
+    }
+
+    /* Move camera to the right side */
+    if (key_d == 1 && key_a == 0) {
+        camera.position.z += camera.look.x * step;
+        camera.position.x -= camera.look.z * step;
+    }
+
+    /* Turn the camera up */
+    if (key_up == 1) {
+        camera.rotation.y -= turn;
+    }
+
+    /* Turn the camera down */
+    if (key_down == 1) {
+        camera.rotation.y += turn;
+    }
+
+    /* Turn the camera left */
+    if (key_left == 1) {
+        camera.rotation.x -= turn;
+    }
+
+    /* Turn the camera right */
+    if (key_right == 1) {
+        camera.rotation.x += turn;
     }
 }
 
@@ -463,6 +556,8 @@ void displayScene() {
     glLineWidth(1.0);
 
     drawObjects();
+
+    calculateInput();
 
     glutSwapBuffers();
 }
