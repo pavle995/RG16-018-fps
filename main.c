@@ -106,8 +106,15 @@ void drawSkySphere();
 void drawCoordinateSystem();
 
 
+/** Calculate camera angles with mouse movements */
+void mouseLook(int mouseX, int mouseY);
+
+/** Calculate where the camera looks */
+void calculateCamera();
+
 /** Calculate input events */
 void calculateInput();
+
 
 /** Calculates aspect ratio */
 float calculateAspectRatio(int width, int height);
@@ -123,6 +130,10 @@ void keyboardSpecialPress(int key, int mouseX, int mouseY);
 
 /** Handles special keyboard character release key states */
 void keyboardSpecialRelease(int key, int mouseX, int mouseY);
+
+/** Handles mouse movement event */
+void mouseMove(int mouseX, int mouseY);
+
 
 /** Renders the 3D scene */
 void displayScene();
@@ -405,12 +416,14 @@ void initGlut() {
     glutKeyboardUpFunc(keyboardBasicRelease);
     glutSpecialFunc(keyboardSpecialPress);
     glutSpecialUpFunc(keyboardSpecialRelease);
+    glutPassiveMotionFunc(mouseMove);
     glutDisplayFunc(displayScene);
     glutIdleFunc(displayScene);
     glutReshapeFunc(resizeWindow);
 
     /* Set GLUT states */
     glutIgnoreKeyRepeat(1);
+    glutSetCursor(GLUT_CURSOR_NONE);
 }
 
 void startGlut() {
@@ -430,6 +443,12 @@ void keyboardBasicPress(unsigned char key, int mouseX, int mouseY) {
             break;
         case 'd':
             key_d = 1;
+            break;
+
+        /* Exit the program on ESC button press */
+        case 27:
+            glutLeaveMainLoop();
+            exitProgram();
             break;
     }
 
@@ -491,6 +510,61 @@ void keyboardSpecialRelease(int key, int mouseX, int mouseY) {
     }
 
     glutPostRedisplay();
+}
+
+void mouseMove(int mouseX, int mouseY) {
+    /* Apply a simple hack to stop glutWarpPointer from freezing the program */
+    static int warped = 0;
+
+    if (warped) {
+        warped = 0;
+        return;
+    }
+
+    mouseLook(mouseX, mouseY);
+
+    /* Place the cursor on the center of the window */
+    glutWarpPointer(windowWidth / 2, windowHeight / 2);
+    warped = 1;
+}
+
+void mouseLook(int mouseX, int mouseY) {
+    float sensitivity = 0.2;
+
+	/* How much the mouse moved */
+	int dx = mouseX - windowWidth  / 2;
+	int dy = mouseY - windowHeight / 2;
+
+	/* Add mouse sensitivity and fix aspect ratio diference */
+    camera.rotation.x = camera.rotation.x + (dx * sensitivity);
+    camera.rotation.y = camera.rotation.y + (dy * sensitivity * aspectRatio);
+}
+
+void calculateCamera() {
+    /* Limit camera angles */
+    if (camera.rotation.x < 0)
+        camera.rotation.x = camera.rotation.x + 360;
+    else if (camera.rotation.x > 360)
+        camera.rotation.x = camera.rotation.x - 360;
+
+    if (camera.rotation.z < 0)
+        camera.rotation.z = camera.rotation.z + 360;
+    else if (camera.rotation.z > 360)
+        camera.rotation.z = camera.rotation.z - 360;
+
+    if (camera.rotation.y < 5)
+        camera.rotation.y = 5;
+    else if (camera.rotation.y > 175)
+        camera.rotation.y = 175;
+
+    /* Calculate camera normalized look vector from camera rotation */
+    camera.look.x = sin(toRad(camera.rotation.y)) * cos(toRad(camera.rotation.x));
+    camera.look.z = sin(toRad(camera.rotation.y)) * sin(toRad(camera.rotation.x));
+    camera.look.y = cos(toRad(camera.rotation.y));
+
+    gluLookAt(camera.position.x,                  camera.position.y,                  camera.position.z,
+              camera.position.x + camera.look.x,  camera.position.y + camera.look.y,  camera.position.z + camera.look.z,
+              0.0,                                1.0,                                0.0);
 }
 
 void calculateInput() {
@@ -573,30 +647,7 @@ void displayScene() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    /* Limit camera angles */
-    if (camera.rotation.x < 0)
-        camera.rotation.x = camera.rotation.x + 360;
-    else if (camera.rotation.x > 360)
-        camera.rotation.x = camera.rotation.x - 360;
-
-    if (camera.rotation.z < 0)
-        camera.rotation.z = camera.rotation.z + 360;
-    else if (camera.rotation.z > 360)
-        camera.rotation.z = camera.rotation.z - 360;
-
-    if (camera.rotation.y < 5)
-        camera.rotation.y = 5;
-    else if (camera.rotation.y > 170)
-        camera.rotation.y = 170;
-
-    /* Calculate camera normalized look vector from camera rotation */
-    camera.look.x = sin(toRad(camera.rotation.y)) * cos(toRad(camera.rotation.x));
-    camera.look.z = sin(toRad(camera.rotation.y)) * sin(toRad(camera.rotation.x));
-    camera.look.y = cos(toRad(camera.rotation.y));
-
-    gluLookAt(camera.position.x,                  camera.position.y,                  camera.position.z,
-              camera.position.x + camera.look.x,  camera.position.y + camera.look.y,  camera.position.z + camera.look.z,
-              0.0,                                1.0,                                0.0);
+    calculateCamera();
 
     drawCoordinateSystem();
 
