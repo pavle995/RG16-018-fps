@@ -17,10 +17,16 @@ char* newString(const char* string);
 /** Delete the allocated string memory */
 void  deleteString(const char* string);
 
-/** Delete the old string and make a new one, the old pointer now points to the new string*/
-void replaceString(const char* old, const char* new);
+/** Delete the old string and make a new one, the old pointer now points to the new string */
+void replaceString(const char* oldStr, const char* newStr);
 
 /** Convert degrees to radians */
 float toRad(float degrees);
 
-#endif  /* UTIL_H */
+/** Generate a random float between given lower and upper bounds */
+float randFloat(float lowerBound, float upperBound);
+
+/** Calculates aspect ratio */
+float calculateAspectRatio(int width, int height);
+
+#endif

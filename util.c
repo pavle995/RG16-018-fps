@@ -17,11 +17,23 @@ void deleteString(const char* string) {
     free((void*)string);
 }
 
-void replaceString(const char* old, const char* new) {
-    deleteString(old);
-    old = newString(new);
+void replaceString(const char* oldStr, const char* newStr) {
+    deleteString(oldStr);
+    oldStr = newString(newStr);
 }
 
 float toRad(float degrees) {
     return degrees / (180.0 / M_PI);
+}
+
+float randFloat(float lowerBound, float upperBound) {
+    float number = (float)rand() / RAND_MAX;
+
+    return lowerBound + (number * (upperBound - lowerBound));
+}
+
+extern float calculateAspectRatio(int width, int height) {
+    if (height == 0)
+        height = 1;
+    return (float)width / height;
 }
