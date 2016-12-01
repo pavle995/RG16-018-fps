@@ -16,21 +16,22 @@ void resizeWindow(int width, int height) {
 void displayScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    root->rotation.y += 1;
+    if (root != NULL)
+        root->rotation.y += 1;
 
-    for (int i = 0; i < numberOfFlyingObjects; i++) {
-        // flyingObjects[i]->rotation.x += randFloat(0, 2);
-        // flyingObjects[i]->rotation.y += randFloat(0, 2);
-        // flyingObjects[i]->rotation.z += randFloat(0, 2);
-
-        flyingObjects[i]->rotation.x += 1;
-        flyingObjects[i]->rotation.y += 1;
-        flyingObjects[i]->rotation.z += 1;
-
-        // flyingObjects[i]->translation.x += randFloat(-0.1, 0.1);
-        // flyingObjects[i]->translation.y += randFloat(-0.1, 0.1);
-        // flyingObjects[i]->translation.z += randFloat(-0.1, 0.1);
-    }
+    // for (int i = 0; i < numberOfFlyingObjects; i++) {
+    //     flyingObjects[i]->rotation.x += randFloat(0, 2);
+    //     flyingObjects[i]->rotation.y += randFloat(0, 2);
+    //     flyingObjects[i]->rotation.z += randFloat(0, 2);
+    //
+    //     flyingObjects[i]->rotation.x += 1;
+    //     flyingObjects[i]->rotation.y += 1;
+    //     flyingObjects[i]->rotation.z += 1;
+    //
+    //     flyingObjects[i]->translation.x += randFloat(-0.1, 0.1);
+    //     flyingObjects[i]->translation.y += randFloat(-0.1, 0.1);
+    //     flyingObjects[i]->translation.z += randFloat(-0.1, 0.1);
+    // }
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -70,6 +71,9 @@ void drawObjects() {
 }
 
 void drawSceneObjects(Object* object) {
+    if (object == NULL)
+        return;
+
     glPushMatrix();
         glRotatef(object->rotation.x, 1, 0, 0);
         glRotatef(object->rotation.y, 0, 1, 0);

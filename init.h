@@ -12,6 +12,7 @@
 #include "types.h"
 #include "input.h"
 #include "render.h"
+#include "sceneLoader.h"
 
 extern int* argumentCount;
 extern char** arguments;
