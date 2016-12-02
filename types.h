@@ -12,6 +12,25 @@ typedef struct Vec3f {
     float z;
 } Vec3f;
 
+typedef struct Vertex {
+	float x;
+	float y;
+	float z;
+} Vertex;
+
+typedef struct Triangle {
+	int v0;
+	int v1;
+	int v2;
+} Triangle;
+
+typedef struct Model {
+    Triangle* triangles;
+    Vertex*   verticies;
+    int       numberOfTriangles;
+    int       numberOfVerticies;
+} Model;
+
 /** Create a vector structure with 3 floats */
 Vec3f* createVec3f(float x, float y, float z);
 

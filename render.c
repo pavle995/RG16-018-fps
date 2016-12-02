@@ -40,6 +40,13 @@ void displayScene() {
 
     drawCoordinateSystem();
 
+    glPushMatrix();
+        glTranslatef(0, 1, 0);
+        glRotatef(30, 0, 1, 0);
+        glColor3f(0.58, 0.33, 0.04);
+        drawModel(testModel, WIRE);
+    glPopMatrix();
+
     drawObjects();
 
     calculateInput();
@@ -94,4 +101,65 @@ void drawSceneObjects(Object* object) {
         }
 
     glPopMatrix();
+}
+
+void drawModel(Model model, ModelMode mode) {
+    if (mode == POINTS) {
+        /* Draw triangle points */
+    	glPointSize(2);
+    	for (int i = 0; i < model.numberOfVerticies; i++) {
+    		glBegin(GL_POINTS);
+    			glVertex3f(model.verticies[i].x, model.verticies[i].y, model.verticies[i].z);
+    		glEnd();
+    	}
+    }
+
+    else if (mode == WIRE) {
+        /* Draw triangle lines */
+    	glLineWidth(2);
+    	for (int i = 0; i < model.numberOfTriangles; i++) {
+    		glBegin(GL_LINES);
+    			/* 1st line */
+    			glVertex3f(model.verticies[model.triangles[i].v0].x,
+    					   model.verticies[model.triangles[i].v0].y,
+    				   	   model.verticies[model.triangles[i].v0].z);
+    		    glVertex3f(model.verticies[model.triangles[i].v1].x,
+    					   model.verticies[model.triangles[i].v1].y,
+    				   	   model.verticies[model.triangles[i].v1].z);
+
+    			/* 2nd line */
+    		    glVertex3f(model.verticies[model.triangles[i].v0].x,
+    					   model.verticies[model.triangles[i].v0].y,
+    				   	   model.verticies[model.triangles[i].v0].z);
+    		    glVertex3f(model.verticies[model.triangles[i].v2].x,
+    					   model.verticies[model.triangles[i].v2].y,
+    				   	   model.verticies[model.triangles[i].v2].z);
+
+    			/* 3rd line */
+    		    glVertex3f(model.verticies[model.triangles[i].v1].x,
+    					   model.verticies[model.triangles[i].v1].y,
+    				   	   model.verticies[model.triangles[i].v1].z);
+    		    glVertex3f(model.verticies[model.triangles[i].v2].x,
+    					   model.verticies[model.triangles[i].v2].y,
+    				   	   model.verticies[model.triangles[i].v2].z);
+    		glEnd();
+    	}
+    }
+
+    else if (mode == FULL) {
+        /* Draw triangle faces */
+    	for (int i = 0; i < model.numberOfTriangles; i++) {
+    	    glBegin(GL_TRIANGLES);
+    			glVertex3f(model.verticies[model.triangles[i].v0].x,
+    					   model.verticies[model.triangles[i].v0].y,
+    					   model.verticies[model.triangles[i].v0].z);
+    		    glVertex3f(model.verticies[model.triangles[i].v1].x,
+    					   model.verticies[model.triangles[i].v1].y,
+    					   model.verticies[model.triangles[i].v1].z);
+    		    glVertex3f(model.verticies[model.triangles[i].v2].x,
+    					   model.verticies[model.triangles[i].v2].y,
+    					   model.verticies[model.triangles[i].v2].z);
+    	    glEnd();
+    	}
+    }
 }

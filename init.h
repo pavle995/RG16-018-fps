@@ -13,6 +13,7 @@
 #include "input.h"
 #include "render.h"
 #include "sceneLoader.h"
+#include "modelLoader.h"
 
 extern int* argumentCount;
 extern char** arguments;
@@ -23,6 +24,8 @@ extern int windowHeight;
 extern float aspectRatio;
 
 extern float randAxis[];
+
+extern Model testModel;
 
 /** Initializes program arguments and window properties */
 void initProgram(int* argc, char** argv);

@@ -24,6 +24,12 @@ extern int numberOfObjects;
 extern Object* flyingObjects[];
 extern int numberOfFlyingObjects;
 
+extern Model testModel;
+
+typedef enum ModelMode {
+    POINTS, WIRE, FULL
+} ModelMode;
+
 /** Resizes the window and changes aspect ratio */
 void resizeWindow(int width, int height);
 
@@ -35,5 +41,7 @@ void drawObjects();
 
 /** Recursively draws the object and all its children objects */
 void drawSceneObjects(Object* object);
+
+void drawModel(Model model, ModelMode mode);
 
 #endif

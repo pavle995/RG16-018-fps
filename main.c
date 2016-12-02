@@ -32,6 +32,8 @@ float randAxis[150];
 
 Object* root;
 
+Model testModel;
+
 int main(int argc, char** argv) {
 
     initProgram(&argc, argv);
