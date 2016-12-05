@@ -1,0 +1,36 @@
+# Blender v2.78 (sub 0) OBJ File: 'materialExport.blend'
+# www.blender.org
+mtllib testMaterialCube.mtl
+v -0.500000 -0.500000 2.500000
+v -0.500000 0.500000 2.500000
+v -0.500000 -0.500000 1.500000
+v -0.500000 0.500000 1.500000
+v 0.500000 -0.500000 2.500000
+v 0.500000 0.500000 2.500000
+v 0.500000 -0.500000 1.500000
+v 0.500000 0.500000 1.500000
+usemtl SkinMaterial
+s off
+f 2 3 1
+usemtl StoneMaterial
+f 4 7 3
+usemtl GlassMaterial
+f 8 5 7
+usemtl MetalMaterial
+f 6 1 5
+usemtl NullMaterial
+f 7 1 3
+usemtl ClothMaterial
+f 4 6 8
+usemtl SkinMaterial
+f 2 4 3
+usemtl StoneMaterial
+f 4 8 7
+usemtl GlassMaterial
+f 8 6 5
+usemtl MetalMaterial
+f 6 2 1
+usemtl NullMaterial
+f 7 5 1
+usemtl ClothMaterial
+f 4 2 6

@@ -2,7 +2,8 @@
 *.slo
 *.lo
 *.o
-*.obj
+# *.obj
+# .obj is needed for 3D models
 
 # Precompiled Headers
 *.gch
