@@ -100,7 +100,8 @@ void initWorld() {
     /* New SceneGraphObjects */
     /* Root object */
     loadScene(&root, "scene");
-    testModel = loadModel("models/monkey.obj");
+    //testModel = loadModel("models/monkey.obj");
+    testModel = loadModel("models/tree.obj");
 
     // setVec3f(tmpTranslation,  2, 2, 2);
     // setVec3f(tmpRotation,     0,   0,   0);

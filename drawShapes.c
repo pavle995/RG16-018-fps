@@ -3,10 +3,10 @@
 void drawGround() {
     glColor3f(0.24, 0.4, 0.12);
     glBegin(GL_QUADS);
-        glVertex3f(-2.0, 0.0, -2.0);
-        glVertex3f(-2.0, 0.0,  2.0);
-        glVertex3f( 2.0, 0.0,  2.0);
-        glVertex3f( 2.0, 0.0, -2.0);
+        glVertex3f(-4.0, 0.0, -4.0);
+        glVertex3f(-4.0, 0.0,  4.0);
+        glVertex3f( 4.0, 0.0,  4.0);
+        glVertex3f( 4.0, 0.0, -4.0);
     glEnd();
 }
 

@@ -40,11 +40,26 @@ void displayScene() {
 
     drawCoordinateSystem();
 
+    /* Draw test trees, TODO: put them in the scenegraph later */
+    /* Tree 1 */
     glPushMatrix();
-        glTranslatef(0, 1, 0);
+        glTranslatef(0.5, 0, -0.5);
         glRotatef(30, 0, 1, 0);
-        glColor3f(0.58, 0.33, 0.04);
-        drawModel(testModel, WIRE);
+        drawModel(testModel, FULL);
+    glPopMatrix();
+    /* Tree 2 */
+    glPushMatrix();
+        glTranslatef(-2, 0, 2.5);
+        glScalef(0.6, 0.6, 0.6);
+        glRotatef(70, 0, 1, 0);
+        drawModel(testModel, FULL);
+    glPopMatrix();
+    /* Tree 3 */
+    glPushMatrix();
+        glTranslatef(2.5, 0, 1.5);
+        glScalef(0.4, 0.4, 0.4);
+        glRotatef(130, 0, 1, 0);
+        drawModel(testModel, FULL);
     glPopMatrix();
 
     drawObjects();
@@ -119,6 +134,12 @@ void drawModel(Model model, ModelMode mode) {
     	glLineWidth(2);
     	for (int i = 0; i < model.numberOfTriangles; i++) {
     		glBegin(GL_LINES);
+                /* Placeholder material colors (without lighting) TODO: fix or remove wireframe colors */
+                if (model.numberOfMaterials > 0)
+                    glColor3f(model.materials[model.triangles[i].materialID].diffuse[0],
+                              model.materials[model.triangles[i].materialID].diffuse[1],
+                              model.materials[model.triangles[i].materialID].diffuse[2]);
+
     			/* 1st line */
     			glVertex3f(model.verticies[model.triangles[i].v0].x,
     					   model.verticies[model.triangles[i].v0].y,
@@ -150,6 +171,13 @@ void drawModel(Model model, ModelMode mode) {
         /* Draw triangle faces */
     	for (int i = 0; i < model.numberOfTriangles; i++) {
     	    glBegin(GL_TRIANGLES);
+
+                /* Placeholder material colors (without lighting) */
+                if (model.numberOfMaterials > 0)
+                    glColor3f(model.materials[model.triangles[i].materialID].diffuse[0],
+                              model.materials[model.triangles[i].materialID].diffuse[1],
+                              model.materials[model.triangles[i].materialID].diffuse[2]);
+
     			glVertex3f(model.verticies[model.triangles[i].v0].x,
     					   model.verticies[model.triangles[i].v0].y,
     					   model.verticies[model.triangles[i].v0].z);
