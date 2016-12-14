@@ -47,6 +47,15 @@ void initGL() {
 
     glEnable(GL_DEPTH_TEST);
 
+    //GLfloat lightPosition[] = {-8, 4, 6, 1};
+    GLfloat lightAmbient[]  = {0.1, 0.1, 0.2, 0};
+    GLfloat lightDiffuse[]  = {0.8, 0.8, 0.8, 0};
+    GLfloat lightSpecular[] = {0.4, 0.4, 0.4, 0};
+    //glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+    glLightfv(GL_LIGHT0, GL_AMBIENT,  lightAmbient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE,  lightDiffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular);
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(camera.fov, aspectRatio, camera.clipNear, camera.clipFar);
@@ -101,7 +110,7 @@ void initWorld() {
     /* Root object */
     loadScene(&root, "scene");
     //testModel = loadModel("models/monkey.obj");
-    testModel = loadModel("models/tree.obj");
+    testModel = loadModel("models/tree_v2.obj");
 
     // setVec3f(tmpTranslation,  2, 2, 2);
     // setVec3f(tmpRotation,     0,   0,   0);

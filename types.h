@@ -5,6 +5,11 @@
 
 #include "util.h"
 
+typedef struct Vec2f {
+    float x;
+    float y;
+} Vec2f;
+
 /* Float vector with 3 components */
 typedef struct Vec3f {
     float x;
@@ -22,6 +27,13 @@ typedef struct Triangle {
 	int v0;
 	int v1;
 	int v2;
+    Vec3f vn0;  /* TODO: make separate structures for this */
+    Vec3f vn1;
+    Vec3f vn2;
+    Vec2f texcoord0;
+    Vec2f texcoord1;
+    Vec2f texcoord2;
+    int smooth;
     int materialID;
 } Triangle;
 

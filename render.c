@@ -40,6 +40,16 @@ void displayScene() {
 
     drawCoordinateSystem();
 
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    // TODO: testing rotating light
+    glPushMatrix();
+        glRotatef(root->rotation.y + 80, 0, 1, 0);
+        GLfloat lightPosition[] = {-8, 4, 6, 1};
+        glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+    glPopMatrix();
+
     /* Draw test trees, TODO: put them in the scenegraph later */
     /* Tree 1 */
     glPushMatrix();
@@ -61,6 +71,8 @@ void displayScene() {
         glRotatef(130, 0, 1, 0);
         drawModel(testModel, FULL);
     glPopMatrix();
+
+    glDisable(GL_LIGHTING);
 
     drawObjects();
 
@@ -169,25 +181,49 @@ void drawModel(Model model, ModelMode mode) {
 
     else if (mode == FULL) {
         /* Draw triangle faces */
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+
+        glEnable(GL_NORMALIZE); // TODO: fix scaling affecting normals
+
     	for (int i = 0; i < model.numberOfTriangles; i++) {
     	    glBegin(GL_TRIANGLES);
 
-                /* Placeholder material colors (without lighting) */
-                if (model.numberOfMaterials > 0)
-                    glColor3f(model.materials[model.triangles[i].materialID].diffuse[0],
-                              model.materials[model.triangles[i].materialID].diffuse[1],
-                              model.materials[model.triangles[i].materialID].diffuse[2]);
+                if (model.triangles[i].smooth == 1)
+                    glEnable(GL_SMOOTH);
+                else
+                    glDisable(GL_SMOOTH);
 
-    			glVertex3f(model.verticies[model.triangles[i].v0].x,
+                /* Placeholder material colors (without lighting) */
+                // if (model.numberOfMaterials > 0)
+                //     glColor3f(model.materials[model.triangles[i].materialID].diffuse[0],
+                //               model.materials[model.triangles[i].materialID].diffuse[1],
+                //               model.materials[model.triangles[i].materialID].diffuse[2]);
+
+                glMaterialfv(GL_FRONT, GL_AMBIENT,   model.materials[model.triangles[i].materialID].ambient);
+                glMaterialfv(GL_FRONT, GL_DIFFUSE,   model.materials[model.triangles[i].materialID].diffuse);
+                glMaterialfv(GL_FRONT, GL_SPECULAR,  model.materials[model.triangles[i].materialID].specular);
+                glMaterialfv(GL_FRONT, GL_EMISSION,  model.materials[model.triangles[i].materialID].emission);
+                glMaterialf( GL_FRONT, GL_SHININESS, model.materials[model.triangles[i].materialID].shininess);
+
+                glNormal3f(model.triangles[i].vn0.x, model.triangles[i].vn0.y, model.triangles[i].vn0.z);
+                glVertex3f(model.verticies[model.triangles[i].v0].x,
     					   model.verticies[model.triangles[i].v0].y,
     					   model.verticies[model.triangles[i].v0].z);
-    		    glVertex3f(model.verticies[model.triangles[i].v1].x,
+
+                glNormal3f(model.triangles[i].vn1.x, model.triangles[i].vn1.y, model.triangles[i].vn1.z);
+                glVertex3f(model.verticies[model.triangles[i].v1].x,
     					   model.verticies[model.triangles[i].v1].y,
     					   model.verticies[model.triangles[i].v1].z);
-    		    glVertex3f(model.verticies[model.triangles[i].v2].x,
+
+                glNormal3f(model.triangles[i].vn2.x, model.triangles[i].vn2.y, model.triangles[i].vn2.z);
+                glVertex3f(model.verticies[model.triangles[i].v2].x,
     					   model.verticies[model.triangles[i].v2].y,
     					   model.verticies[model.triangles[i].v2].z);
     	    glEnd();
     	}
+
+        glDisable(GL_SMOOTH);
+        glDisable(GL_CULL_FACE);
     }
 }

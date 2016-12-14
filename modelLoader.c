@@ -22,13 +22,21 @@ Model loadModel(const char* filename) {
     int materialCount = 0;
 
     int vCount = 0;
+    int vnCount = 0;
+    int vtCount = 0;
 	int fCount = 0;
 
 	/* Count number of verticies and triangles, and get material library name */
 	while(fgets(line, lineLength, inputFile) != NULL) {
         sscanf(line, "%c", &type);
-        if (type == 'v')
-        	vCount++;
+        if (type == 'v') {
+            if (line[1] == ' ')
+                vCount++;
+            else if (line[1] == 'n')
+                vnCount++;
+            else if (line[1] == 't')
+                vtCount++;
+        }
         else if (type == 'f')
         	fCount++;
 
@@ -48,7 +56,15 @@ Model loadModel(const char* filename) {
 	if (verticies == NULL)
 		errorFatal("Malloc error");
 
-	Triangle* triangles = (Triangle*) malloc(fCount * sizeof(Triangle));
+    Vec3f* vertexNormals = (Vec3f*) malloc(vnCount * sizeof(Vec3f));
+    if (vertexNormals == NULL)
+        errorFatal("Malloc error");
+
+    Vec2f* textureCoordinates = (Vec2f*) malloc(vtCount * sizeof(Vec2f));
+    if (textureCoordinates == NULL)
+        errorFatal("Malloc error");
+
+    Triangle* triangles = (Triangle*) malloc(fCount * sizeof(Triangle));
 	if (triangles == NULL)
 		errorFatal("Malloc error");
 
@@ -207,30 +223,189 @@ Model loadModel(const char* filename) {
 	/* Read model data */
 	rewind(inputFile);
 
-	int vRead = 0;
-	int fRead = 0;
     int currentMaterial = 0;    /* TODO make triangles with no material get a NULL material */
+    int currentSmoothShade = 0;
+
+    int vRead = 0;
+    int vnRead = 0;
+    int vtRead = 0;
+	int fRead = 0;
 	while(fgets(line, lineLength, inputFile) != NULL) {
 		sscanf(line, "%c", &type);
 		if (type == 'v') {
-            /* Vertex */
-			sscanf(line, "v %f %f %f",
-				&(verticies[vRead].x),
-				&(verticies[vRead].y),
-				&(verticies[vRead].z));
-			vRead++;
+            if (line[1] == ' ') {
+                /* Vertex */
+    			sscanf(line, "v %f %f %f",
+    				&(verticies[vRead].x),
+    				&(verticies[vRead].y),
+    				&(verticies[vRead].z));
+    			vRead++;
+            }
+            else if (line[1] == 'n') {
+                /* Vertex normal */
+                sscanf(line, "vn %f %f %f",
+                    &(vertexNormals[vnRead].x),
+                    &(vertexNormals[vnRead].y),
+                    &(vertexNormals[vnRead].z));
+    			vnRead++;
+            }
+            else if (line[1] == 't') {
+                /* Texture coordinates */
+                sscanf(line, "vt %f %f",
+                    &(textureCoordinates[vtRead].x),
+                    &(textureCoordinates[vtRead].y));
+    			vtRead++;
+            }
 		} else if (type == 'f') {
             /* Triangle face */
-			sscanf(line, "f %d %d %d",
-				&(triangles[fRead].v0),
-				&(triangles[fRead].v1),
-				&(triangles[fRead].v2));
+            /* Check line type */
+            int faceType = 0;
+            char slash1, slash2;
 
-				triangles[fRead].v0--;
-				triangles[fRead].v1--;
-				triangles[fRead].v2--;
-                triangles[fRead].materialID = currentMaterial;
-			fRead++;
+            /* See comment bellow for magic number identification */
+            sscanf(line, "f %*d%c",&slash1);
+            if (slash1 == ' ')
+                faceType = 0;               /* 0 - Vertex only              v0 v1 v2  */
+            else if (slash1 == '/') {
+                sscanf(line, "f %*d%c%c", &slash1, &slash2);
+                if (slash2 == '/')
+                    faceType = 3;           /* 3 - Vertex//Normal           v0//vn0 v1//vn1 v2//vn2  */
+                else {
+                    sscanf(line, "f %*d%c%*d%c", &slash1, &slash2);
+                    if (slash2 == '/')
+                        faceType = 2;       /* 2 - Vertex/Texcoord/Normal   v0/vt0/vn0 v1/vt1/vn1 v2/vt2/vn2  */
+                    else
+                        faceType = 1;       /* 1 - Vertex/Texcoord          v0/vt0 v1/vt1 v2/vt2  */
+                }
+            }
+            else {
+                fprintf(stderr, "Line: %s\n", line);
+                errorFatal("Bad vertex format");
+            }
+
+            /* 0 - Vertex only              v0 v1 v2  */
+            if (faceType == 0) {
+                sscanf(line, "f %d %d %d",
+    				&(triangles[fRead].v0),
+    				&(triangles[fRead].v1),
+    				&(triangles[fRead].v2));
+
+                /* Set unused texcoord and normals to 0 */
+                triangles[fRead].texcoord0.x = 0;
+                triangles[fRead].texcoord0.y = 0;
+                triangles[fRead].texcoord1.x = 0;
+                triangles[fRead].texcoord1.y = 0;
+                triangles[fRead].texcoord2.x = 0;
+                triangles[fRead].texcoord2.y = 0;
+
+                triangles[fRead].vn0.x = 0;
+                triangles[fRead].vn0.y = 0;
+                triangles[fRead].vn0.z = 0;
+                triangles[fRead].vn1.x = 0;
+                triangles[fRead].vn1.y = 0;
+                triangles[fRead].vn1.z = 0;
+                triangles[fRead].vn2.x = 0;
+                triangles[fRead].vn2.y = 0;
+                triangles[fRead].vn2.z = 0;
+            }
+            /* 1 - Vertex/Texcoord          v0/vt0 v1/vt1 v2/vt2  */
+            else if (faceType == 1) {
+                int tc0, tc1, tc2;
+                sscanf(line, "f %d/%d %d/%d %d/%d",
+    				&(triangles[fRead].v0),
+                    &tc0,
+    				&(triangles[fRead].v1),
+                    &tc1,
+    				&(triangles[fRead].v2),
+                    &tc2);
+
+                triangles[fRead].texcoord0.x = textureCoordinates[tc0 - 1].x;
+                triangles[fRead].texcoord0.y = textureCoordinates[tc0 - 1].y;
+                triangles[fRead].texcoord1.x = textureCoordinates[tc1 - 1].x;
+                triangles[fRead].texcoord1.y = textureCoordinates[tc1 - 1].y;
+                triangles[fRead].texcoord2.x = textureCoordinates[tc2 - 1].x;
+                triangles[fRead].texcoord2.y = textureCoordinates[tc2 - 1].y;
+
+                /* Set unused normals to 0 */
+                triangles[fRead].vn0.x = 0;
+                triangles[fRead].vn0.y = 0;
+                triangles[fRead].vn0.z = 0;
+                triangles[fRead].vn1.x = 0;
+                triangles[fRead].vn1.y = 0;
+                triangles[fRead].vn1.z = 0;
+                triangles[fRead].vn2.x = 0;
+                triangles[fRead].vn2.y = 0;
+                triangles[fRead].vn2.z = 0;
+            }
+            /* 2 - Vertex/Texcoord/Normal   v0/vt0/vn0 v1/vt1/vn1 v2/vt2/vn2  */
+            else if (faceType == 2) {
+                int tc0, tc1, tc2;
+                int n0, n1, n2;
+                sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d",
+    				&(triangles[fRead].v0),
+                    &tc0,
+                    &n0,
+    				&(triangles[fRead].v1),
+                    &tc1,
+                    &n1,
+    				&(triangles[fRead].v2),
+                    &tc2,
+                    &n2);
+
+                triangles[fRead].texcoord0.x = textureCoordinates[tc0 - 1].x;
+                triangles[fRead].texcoord0.y = textureCoordinates[tc0 - 1].y;
+                triangles[fRead].texcoord1.x = textureCoordinates[tc1 - 1].x;
+                triangles[fRead].texcoord1.y = textureCoordinates[tc1 - 1].y;
+                triangles[fRead].texcoord2.x = textureCoordinates[tc2 - 1].x;
+                triangles[fRead].texcoord2.y = textureCoordinates[tc2 - 1].y;
+
+                triangles[fRead].vn0.x = vertexNormals[n0 - 1].x;
+                triangles[fRead].vn0.y = vertexNormals[n0 - 1].y;
+                triangles[fRead].vn0.z = vertexNormals[n0 - 1].z;
+                triangles[fRead].vn1.x = vertexNormals[n1 - 1].x;
+                triangles[fRead].vn1.y = vertexNormals[n1 - 1].y;
+                triangles[fRead].vn1.z = vertexNormals[n1 - 1].z;
+                triangles[fRead].vn2.x = vertexNormals[n2 - 1].x;
+                triangles[fRead].vn2.y = vertexNormals[n2 - 1].y;
+                triangles[fRead].vn2.z = vertexNormals[n2 - 1].z;
+            }
+            /* 3 - Vertex//Normal           v0//vn0 v1//vn1 v2//vn2  */
+            else if (faceType == 3) {
+                int n0, n1, n2;
+                sscanf(line, "f %d//%d %d//%d %d//%d",
+    				&(triangles[fRead].v0),
+                    &n0,
+    				&(triangles[fRead].v1),
+                    &n1,
+    				&(triangles[fRead].v2),
+                    &n2);
+
+                triangles[fRead].texcoord0.x = 0;
+                triangles[fRead].texcoord0.y = 0;
+                triangles[fRead].texcoord1.x = 0;
+                triangles[fRead].texcoord1.y = 0;
+                triangles[fRead].texcoord2.x = 0;
+                triangles[fRead].texcoord2.y = 0;
+
+                triangles[fRead].vn0.x = vertexNormals[n0 - 1].x;
+                triangles[fRead].vn0.y = vertexNormals[n0 - 1].y;
+                triangles[fRead].vn0.z = vertexNormals[n0 - 1].z;
+                triangles[fRead].vn1.x = vertexNormals[n1 - 1].x;
+                triangles[fRead].vn1.y = vertexNormals[n1 - 1].y;
+                triangles[fRead].vn1.z = vertexNormals[n1 - 1].z;
+                triangles[fRead].vn2.x = vertexNormals[n2 - 1].x;
+                triangles[fRead].vn2.y = vertexNormals[n2 - 1].y;
+                triangles[fRead].vn2.z = vertexNormals[n2 - 1].z;
+            }
+
+            triangles[fRead].v0--;
+            triangles[fRead].v1--;
+            triangles[fRead].v2--;
+            triangles[fRead].materialID = currentMaterial;
+            triangles[fRead].smooth = currentSmoothShade;
+
+            fRead++;
+
         } else if (type == 'u') {
             /* Material */
             sscanf(line, "%s", tmpWord);
@@ -245,11 +420,16 @@ Model loadModel(const char* filename) {
                     }
                 }
             }
+        } else if (type == 's') {
+            /* Smooth shade */
+            int tmp;
+            sscanf(line, "s %d", &tmp);
+            if (tmp == 1)
+                currentSmoothShade = 1;
+            else
+                currentSmoothShade = 0;
         }
 	}
-
-    fclose(inputFile);
-    // fclose(materialFile); /* TODO Closing it gives error */
 
     model.verticies = verticies;
     model.triangles = triangles;
@@ -257,6 +437,11 @@ Model loadModel(const char* filename) {
     model.numberOfVerticies = vCount;
     model.numberOfTriangles = fCount;
     model.numberOfMaterials = materialCount;
+
+    free(vertexNormals);
+    free(textureCoordinates);
+    fclose(inputFile);
+    // fclose(materialFile); /* TODO Closing it gives error */
 
     return model;
 }
