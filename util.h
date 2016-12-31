@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <math.h>
 
+/* TODO: remove GL dependancy from util */
+#include <GL/glu.h>
+#include <GL/gl.h>
+
 #define M_PI 3.14159265358979323846
 
 #ifndef UTIL_H
@@ -28,5 +32,9 @@ float randFloat(float lowerBound, float upperBound);
 
 /** Calculates aspect ratio */
 float calculateAspectRatio(int width, int height);
+
+/** Test OpenGL errors, exit the program if there is any and write it to the terminal,
+ *  Write info string to indicate on what part of the code the error occurred */
+void testErrors(const char* infoString);
 
 #endif

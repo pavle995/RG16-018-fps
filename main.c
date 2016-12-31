@@ -12,6 +12,8 @@
 #include "camera.h"
 #include "drawShapes.h"
 
+/* TODO: place all these global variables in a better place */
+
 /* Global states and variables */
 int*   argumentCount;
 char** arguments;
@@ -32,7 +34,10 @@ float randAxis[150];
 
 Object* root;
 
+/* Models used */
 Model testModel;
+Model tree;
+Model skySphere;
 
 int main(int argc, char** argv) {
 
@@ -43,6 +48,7 @@ int main(int argc, char** argv) {
 
     initGL();
 
+	/* TODO: Organize main event loop, split it from glutMainLoop? */
     startGlut();
 
     return 0;

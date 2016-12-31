@@ -3,10 +3,9 @@
 
 #include <GL/glut.h>
 
+#include "project.h"
 #include "init.h"
-#include "camera.h"
-
-#define UNUSED(x) (void)(x);    /* MACRO to hide unused parameter warnings */
+#include "camera.h"  
 
 extern int windowHeight;
 extern int windowWidth;

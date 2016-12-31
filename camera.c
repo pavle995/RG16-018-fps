@@ -11,7 +11,7 @@ void initCamera() {
 
     camera.fov      = 60.0;
     camera.clipNear = 0.01;
-    camera.clipFar  = 100.0;
+    camera.clipFar  = 200.0;
 }
 
 void calculateCamera() {

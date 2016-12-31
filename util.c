@@ -37,3 +37,14 @@ extern float calculateAspectRatio(int width, int height) {
         height = 1;
     return (float)width / height;
 }
+
+void testErrors(const char* infoString) {
+	GLuint errorNumber;
+	errorNumber = glGetError();
+	if (errorNumber != GL_NO_ERROR) {
+		const GLubyte* errorMessage = gluErrorString(errorNumber);
+		fprintf(stderr, "Error test for: [%s] -> (%u) %s\n", infoString, errorNumber, errorMessage);
+		//free((void*)errorMessage);	// free string???
+		exit(EXIT_FAILURE);
+	}
+}

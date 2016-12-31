@@ -24,10 +24,14 @@ extern int numberOfObjects;
 extern Object* flyingObjects[];
 extern int numberOfFlyingObjects;
 
+extern unsigned int nullTexture;
+
 extern Model testModel;
+extern Model tree;
+extern Model skySphere;
 
 typedef enum ModelMode {
-    POINTS, WIRE, FULL
+    POINTS, WIRE, FULL, COMBINED
 } ModelMode;
 
 /** Resizes the window and changes aspect ratio */
@@ -42,6 +46,7 @@ void drawObjects();
 /** Recursively draws the object and all its children objects */
 void drawSceneObjects(Object* object);
 
+/** Draw a model with points or with wireframe or fully drawn */
 void drawModel(Model model, ModelMode mode);
 
 #endif

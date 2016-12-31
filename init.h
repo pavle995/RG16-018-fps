@@ -15,6 +15,8 @@
 #include "sceneLoader.h"
 #include "modelLoader.h"
 
+#include "imageTGA.h"
+
 extern int* argumentCount;
 extern char** arguments;
 
@@ -26,6 +28,8 @@ extern float aspectRatio;
 extern float randAxis[];
 
 extern Model testModel;
+extern Model tree;
+extern Model skySphere;
 
 /** Initializes program arguments and window properties */
 void initProgram(int* argc, char** argv);

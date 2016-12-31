@@ -1,5 +1,7 @@
 #include "drawShapes.h"
 
+extern unsigned int skyTexture;
+
 void drawGround() {
     glColor3f(0.24, 0.4, 0.12);
     glBegin(GL_QUADS);
@@ -89,11 +91,16 @@ void drawCoordinateSystem() {
 }
 
 void drawSkySphere() {
-    glColor3f(0.08, 0.35, 0.71);
+	
+    //glColor3f(0.08, 0.35, 0.71);
+	glColor3f(1, 1, 1);
     glPushMatrix();
-        glScalef(1.0, 0.5, 1.0);
-        glRotatef(90, 1, 0, 0);
-        glLineWidth(1.0);
-        glutWireSphere(10, 20, 10);
+		glRotatef(90, 0, 1, 0);
+        glScalef(10.0, 5.0, 10.0);
+        //glLineWidth(1.0);
+        //glutSolidSphere(10, 20, 10);
+		drawModel(skySphere, FULL);
     glPopMatrix();
+	
+	
 }

@@ -1,5 +1,7 @@
 #include "modelLoader.h"
 
+extern int nullTexture;
+
 Model loadModel(const char* filename) {
     Model model;
 
@@ -149,6 +151,7 @@ Model loadModel(const char* filename) {
                         materials[readMaterials - 1].emission[2] = tmpMaterial.emission[2];
                         materials[readMaterials - 1].alpha = tmpMaterial.alpha;
                         materials[readMaterials - 1].illuminationModel = tmpMaterial.illuminationModel;
+						materials[readMaterials - 1].textureID = tmpMaterial.textureID;
                     }
                     readMaterials++;
                 }
@@ -199,6 +202,53 @@ Model loadModel(const char* filename) {
                     tmpMaterial.illuminationModel = tmp0;
                 }
             }
+			/* Read texture maps */
+			else if (type == 'm') {
+				/* Diffuse texture map */
+				sscanf(line, "%s", tmpWord);
+				if (strcmp(tmpWord, "map_Kd") == 0) {
+					sscanf(line, "map_Kd %s", tmpWord);
+					/* No texture */
+					if (tmpWord[0] == '/') {
+						tmpMaterial.textureID = nullTexture;
+					}
+					/* Load texture image file and bind it to an ID */
+					else {
+						sprintf(tmpWord, "images/");
+						int pos = strlen(tmpWord);
+						sscanf(line, "map_Kd %s", (tmpWord + pos));
+						glGenTextures(1, &(tmpMaterial.textureID));
+
+						printf("IMAGE: %s\n", tmpWord);
+						printf("Whole line: %s", line);
+
+						InternalImage* image;
+						image = imageLoadTGA(tmpWord);
+
+						glBindTexture(GL_TEXTURE_2D, tmpMaterial.textureID);
+						printf("Binded texture to ID: %d\n", tmpMaterial.textureID);						
+
+						glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // GL_LINEAR
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // GL_LIENAR
+						if (image->dataFormat == FormatRGB) {
+							glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+										 image->width, image->height, 0,
+										 GL_RGB, GL_UNSIGNED_BYTE, image->data);
+						} else if (image->dataFormat == FormatRGBA) {
+							glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+										 image->width, image->height, 0,
+										 GL_RGBA, GL_UNSIGNED_BYTE, image->data);
+						}
+
+						
+						
+						deleteImage(image);
+					}
+				}
+			}
         }
 
         /* Save the last material */
@@ -218,7 +268,14 @@ Model loadModel(const char* filename) {
         materials[readMaterials - 1].emission[2] = tmpMaterial.emission[2];
         materials[readMaterials - 1].alpha = tmpMaterial.alpha;
         materials[readMaterials - 1].illuminationModel = tmpMaterial.illuminationModel;
-    }
+		materials[readMaterials - 1].textureID = tmpMaterial.textureID;
+
+		/* TODO: debug text */
+		//for (int i = 0; i < readMaterials; i++) {
+		//	printf("MaterialID: %d\n", materials[i].id);
+		//	printf("    TextureID: %d\n", materials[i].textureID);
+		//}
+	}
 
 	/* Read model data */
 	rewind(inputFile);
@@ -412,7 +469,7 @@ Model loadModel(const char* filename) {
             if (strcmp(tmpWord, "usemtl") == 0) {
                 sscanf(line, "usemtl %s", tmpWord);
 
-                /* Find what material ID ist that material name */
+                /* Find what material ID is that material name */
                 for (int i = 0; i < materialCount; i++) {
                     if (strcmp(tmpWord, materialNames[i]) == 0) {
                         currentMaterial = i;

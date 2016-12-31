@@ -18,3 +18,7 @@ void setVec3f(Vec3f* vec3f, float x, float y, float z) {
     vec3f->y = y;
     vec3f->z = z;
 }
+
+void deleteVec3f(Vec3f* vec3f) {
+	free(vec3f);
+}

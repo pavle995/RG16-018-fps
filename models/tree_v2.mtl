@@ -10,8 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 0.000000
 illum 2
-map_Kd /
-map_d /
+map_Kd LeavesDrawn512.tga
 
 newmtl Wood
 Ns 17.647059
@@ -22,4 +21,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd -s 4.000000 4.000000 1.000000 /
+map_Kd Wood256.tga

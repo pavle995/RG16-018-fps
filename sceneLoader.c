@@ -64,6 +64,8 @@ void loadScene(Object** rootObject, const char* filepath) {
             drawFunction = drawBall;
         } else if (strcmp("box", objectName) == 0) {
             drawFunction = drawBox;
+		} else if (strcmp("empty", objectName) == 0) {
+			drawFunction = drawEmpty;
         } else {
             fprintf(stderr, "\nin line: %s", line);
             fprintf(stderr, "Object: %s\n", objectName);

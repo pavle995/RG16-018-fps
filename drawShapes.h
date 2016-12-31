@@ -1,6 +1,8 @@
 #ifndef DRAWSHAPES_H
 #define DRAWSHAPES_H
 
+#include "render.h"
+
 #include <GL/glut.h>
 #include <GL/gl.h>
 
