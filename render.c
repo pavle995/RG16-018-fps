@@ -120,21 +120,21 @@ void displayScene() {
     glPushMatrix();
         //glTranslatef(0.5, 0, -0.5);
         //glRotatef(0, 0, 1, 0);
-        drawModel(testModel, COMBINED);
+        drawModel(testModel, FULL);
     glPopMatrix();
     /* Tree 2 */
     glPushMatrix();
         glTranslatef(-2, -0.25, 2.5);
         glScalef(1, 1, 1);
         glRotatef(70, 0, 1, 0);
-        drawModel(tree, COMBINED);
+        drawModel(tree, FULL);
     glPopMatrix();
     /* Tree 3 */
     glPushMatrix();
         glTranslatef(-9, -0.5, -7.5);
         glScalef(1.2, 1.2, 1.2);
         glRotatef(130, 0, 1, 0);
-        drawModel(tree, COMBINED);
+        drawModel(tree, FULL);
     glPopMatrix();
 
     glDisable(GL_LIGHTING);

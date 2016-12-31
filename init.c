@@ -56,7 +56,7 @@ void initSky() {
 	glGenTextures(1, &skyTexture);
 
 	glBindTexture(GL_TEXTURE_2D, skyTexture);
-	printf("Binded texture to ID: %d\n", skyTexture);						
+	printf("Binded texture to ID: %d\n", skyTexture);
 
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
