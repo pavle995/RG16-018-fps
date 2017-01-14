@@ -91,7 +91,7 @@ void drawCoordinateSystem() {
 }
 
 void drawSkySphere() {
-	
+
     //glColor3f(0.08, 0.35, 0.71);
 	glColor3f(1, 1, 1);
     glPushMatrix();
@@ -99,8 +99,8 @@ void drawSkySphere() {
         glScalef(10.0, 5.0, 10.0);
         //glLineWidth(1.0);
         //glutSolidSphere(10, 20, 10);
-		drawModel(skySphere, FULL);
+		drawRawModel(skySphere, FULL);
     glPopMatrix();
-	
-	
+
+
 }

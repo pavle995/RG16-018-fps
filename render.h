@@ -15,6 +15,9 @@ extern int windowHeight;
 extern int windowWidth;
 extern float aspectRatio;
 
+extern long currentTime;
+extern int  deltaTime;
+
 extern Object* root;
 extern Camera camera;
 
@@ -25,6 +28,10 @@ extern Object* flyingObjects[];
 extern int numberOfFlyingObjects;
 
 extern unsigned int nullTexture;
+
+extern Model levelMain;
+extern Model levelDecor;
+extern Model skyModel;
 
 extern Model testModel;
 extern Model tree;
@@ -47,6 +54,8 @@ void drawObjects();
 void drawSceneObjects(Object* object);
 
 /** Draw a model with points or with wireframe or fully drawn */
-void drawModel(Model model, ModelMode mode);
+void drawRawModel(Model model, ModelMode mode);
+
+void drawDisplayListModel(Model model);
 
 #endif

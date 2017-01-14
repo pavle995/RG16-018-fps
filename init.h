@@ -25,7 +25,14 @@ extern int windowWidth;
 extern int windowHeight;
 extern float aspectRatio;
 
+extern long currentTime;
+extern int  deltaTime;
+
 extern float randAxis[];
+
+extern Model levelMain;
+extern Model levelDecor;
+extern Model skyModel;
 
 extern Model testModel;
 extern Model tree;

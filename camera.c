@@ -1,12 +1,12 @@
 #include "camera.h"
 
 void initCamera() {
-    camera.position.x = 1.2;
-    camera.position.y = 2.4;
-    camera.position.z = 5.5;
+    camera.position.x = -13.0;
+    camera.position.y = 1.8;
+    camera.position.z = -7.0;
 
-    camera.rotation.x = 250.0;
-    camera.rotation.y = 120.0;
+    camera.rotation.x = 60.0;
+    camera.rotation.y = 90.0;
     camera.rotation.z = 0.0;
 
     camera.fov      = 60.0;

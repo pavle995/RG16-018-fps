@@ -5,11 +5,14 @@
 
 #include "project.h"
 #include "init.h"
-#include "camera.h"  
+#include "camera.h"
 
 extern int windowHeight;
 extern int windowWidth;
 extern float aspectRatio;
+
+extern int deltaTime;
+
 extern Camera camera;
 
 extern void glutLeaveMainLoop(void);

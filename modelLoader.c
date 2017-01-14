@@ -1,6 +1,8 @@
 #include "modelLoader.h"
 
-extern int nullTexture;
+extern unsigned int nullTexture;
+
+unsigned int makeModelDisplayList(Model model);
 
 Model loadModel(const char* filename) {
     Model model;
@@ -226,13 +228,13 @@ Model loadModel(const char* filename) {
 						image = imageLoadTGA(tmpWord);
 
 						glBindTexture(GL_TEXTURE_2D, tmpMaterial.textureID);
-						printf("Binded texture to ID: %d\n", tmpMaterial.textureID);						
+						printf("Binded texture to ID: %d\n", tmpMaterial.textureID);
 
 						glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // GL_LINEAR
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // GL_LIENAR
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 						if (image->dataFormat == FormatRGB) {
 							glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
 										 image->width, image->height, 0,
@@ -243,8 +245,8 @@ Model loadModel(const char* filename) {
 										 GL_RGBA, GL_UNSIGNED_BYTE, image->data);
 						}
 
-						
-						
+
+
 						deleteImage(image);
 					}
 				}
@@ -495,10 +497,81 @@ Model loadModel(const char* filename) {
     model.numberOfTriangles = fCount;
     model.numberOfMaterials = materialCount;
 
+    model.displayListID = makeModelDisplayList(model);
+
     free(vertexNormals);
     free(textureCoordinates);
     fclose(inputFile);
     // fclose(materialFile); /* TODO Closing it gives error */
 
     return model;
+}
+
+unsigned int makeModelDisplayList(Model model) {
+    GLuint displayListID = glGenLists(1);
+
+    glNewList(displayListID, GL_COMPILE);
+        //drawRawModel(model, FULL);
+
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+
+        glEnable(GL_RESCALE_NORMAL); // TODO: fix scaling affecting normals
+
+        glEnable(GL_BLEND);
+    	glEnable(GL_TEXTURE_2D);
+
+        unsigned int oldTexture = 12345;    // Random unused number
+
+    	for (int i = 0; i < model.numberOfTriangles; i++) {
+            /* Get material ID */
+            if (model.numberOfMaterials > 0) {
+                unsigned int textureID = model.materials[model.triangles[i].materialID].textureID;
+                if (oldTexture != textureID) {
+                    if (textureID != nullTexture) {
+                    	glBindTexture(GL_TEXTURE_2D, textureID);
+                    }
+                    oldTexture = textureID;
+                }
+
+                glMaterialfv(GL_FRONT, GL_AMBIENT,   model.materials[model.triangles[i].materialID].ambient);
+                glMaterialfv(GL_FRONT, GL_DIFFUSE,   model.materials[model.triangles[i].materialID].diffuse);
+                glMaterialfv(GL_FRONT, GL_SPECULAR,  model.materials[model.triangles[i].materialID].specular);
+                glMaterialfv(GL_FRONT, GL_EMISSION,  model.materials[model.triangles[i].materialID].emission);
+                glMaterialf( GL_FRONT, GL_SHININESS, model.materials[model.triangles[i].materialID].shininess);
+            }
+
+
+    		glShadeModel(GL_SMOOTH);
+
+    	    glBegin(GL_TRIANGLES);
+                glNormal3f(model.triangles[i].vn0.x, model.triangles[i].vn0.y, model.triangles[i].vn0.z);
+                glTexCoord2f(model.triangles[i].texcoord0.x, model.triangles[i].texcoord0.y);
+                glVertex3f(model.verticies[model.triangles[i].v0].x,
+    					   model.verticies[model.triangles[i].v0].y,
+    					   model.verticies[model.triangles[i].v0].z);
+
+                glNormal3f(model.triangles[i].vn1.x, model.triangles[i].vn1.y, model.triangles[i].vn1.z);
+                glTexCoord2f(model.triangles[i].texcoord1.x, model.triangles[i].texcoord1.y);
+                glVertex3f(model.verticies[model.triangles[i].v1].x,
+    					   model.verticies[model.triangles[i].v1].y,
+    					   model.verticies[model.triangles[i].v1].z);
+
+                glNormal3f(model.triangles[i].vn2.x, model.triangles[i].vn2.y, model.triangles[i].vn2.z);
+                glTexCoord2f(model.triangles[i].texcoord2.x, model.triangles[i].texcoord2.y);
+                glVertex3f(model.verticies[model.triangles[i].v2].x,
+    					   model.verticies[model.triangles[i].v2].y,
+    					   model.verticies[model.triangles[i].v2].z);
+            glEnd();
+    	}
+
+        glDisable(GL_BLEND);
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_RESCALE_NORMAL); // TODO: fix scaling affecting normals
+        glShadeModel(GL_SMOOTH);
+        glDisable(GL_CULL_FACE);
+
+    glEndList();
+
+    return displayListID;
 }

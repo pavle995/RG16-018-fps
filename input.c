@@ -38,8 +38,8 @@ void mouseMove(int mouseX, int mouseY) {
 }
 
 void calculateInput() {
-    float step = 0.05;
-    float turn = 2;
+    float step = 0.0035 * deltaTime;
+    float turn = 0.15 * deltaTime;
 
     /* Move camera forward */
     if (key_w == 1 && key_s == 0) {

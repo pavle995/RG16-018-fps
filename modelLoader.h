@@ -11,6 +11,7 @@
 #include "types.h"
 #include "util.h"
 #include "imageTGA.h"
+#include "render.h"
 
 Model loadModel(const char* filename);
 

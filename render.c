@@ -1,5 +1,9 @@
 #include "render.h"
 
+int  numberOfFrames = 0;
+long lastTime = 0;
+long lastFpsTime = 0;
+
 void resizeWindow(int width, int height) {
     windowHeight = height;
     windowWidth  = width;
@@ -11,6 +15,14 @@ void resizeWindow(int width, int height) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(camera.fov, aspectRatio, camera.clipNear, camera.clipFar);
+}
+
+int limitFps(float fpsLimit) {
+    if (fpsLimit == 0)
+        return 0;
+    if (deltaTime < (1000.0 / fpsLimit))
+        return 1;
+    return 0;
 }
 
 Vec3f* aimHit() {
@@ -26,7 +38,7 @@ Vec3f* aimHit() {
 					1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &dist);
     /* TODO: Distance is aproximated, a very bad thing, FIX THIS!!! */
 	dist = (1 / (1 - dist)) / 130;
-	printf("dist: %f\n", dist);
+	//printf("dist: %f\n", dist);
 
 	distX = camera.look.x * dist;
 	distY = camera.look.y * dist;
@@ -65,11 +77,29 @@ Vec3f* aimHit() {
 }
 
 void displayScene() {
-	testErrors("before display scene");
+	//testErrors("before display scene");
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    /* Calculate time */
+    currentTime = glutGet(GLUT_ELAPSED_TIME);
+    deltaTime   = currentTime - lastTime;
+    /* Limit fps (if needed) */
+    if (limitFps(0)) {
+        return;
+    }
+    lastTime    = currentTime;
+
+    /* Calculate frames per second */
+	numberOfFrames++;
+	if (currentTime - lastFpsTime > 1000) {
+        float framesPerSecond = numberOfFrames * 1000.0 / (currentTime - lastFpsTime);
+		printf("FPS: %4.2f\n", framesPerSecond);
+        lastFpsTime = currentTime;
+		numberOfFrames = 0;
+	}
+
     if (root != NULL)
-        root->rotation.y += 1;
+        root->rotation.y += (0.05 * deltaTime);
 
     // for (int i = 0; i < numberOfFlyingObjects; i++) {
     //     flyingObjects[i]->rotation.x += randFloat(0, 2);
@@ -90,52 +120,66 @@ void displayScene() {
 
     calculateCamera();
 
+    glPushMatrix();
+        glTranslatef(camera.position.x, camera.position.y - 5.0, camera.position.z);
+        glRotatef(90, 1, 0, 0);
+        glScalef(10.0, 5.0, 10.0);
+        glColor3f(1.0, 1.0, 1.0);
+        drawDisplayListModel(skyModel);
+    glPopMatrix();
+    glClear(GL_DEPTH_BUFFER_BIT);
+
     drawCoordinateSystem();
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
 
     // TODO: testing rotating light
-    glPushMatrix();
-        glRotatef(root->rotation.y + 80, 0, 1, 0);
-		glTranslatef(-8, 4, 6);
-        //GLfloat lightPosition[] = {-8, 4, 6, 1};
-		//GLfloat lightPosition[] = {camera.position.x, camera.position.y, camera.position.z, 1};
-		GLfloat lightPosition[] = {0, 0, 0, 1};
-
-
-		//glTranslatef(camera.position.x, camera.position.y, camera.position.z);
-		//glTranslatef(camera.position.x, 1, camera.position.z);
-		glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-
-		glDisable(GL_LIGHTING);
-		glColor3f(1, 1, 0.6);
-		glutSolidSphere(0.4, 12, 8);
-		glEnable(GL_LIGHTING);
-
-    glPopMatrix();
+    // glPushMatrix();
+    //     glRotatef(root->rotation.y + 80, 0, 1, 0);
+	// 	glTranslatef(-8, 4, 6);
+    //     //GLfloat lightPosition[] = {-8, 4, 6, 1};
+	// 	//GLfloat lightPosition[] = {camera.position.x, camera.position.y, camera.position.z, 1};
+	// 	GLfloat lightPosition[] = {0, 0, 0, 1};
+    //
+    //
+	// 	//glTranslatef(camera.position.x, camera.position.y, camera.position.z);
+	// 	//glTranslatef(camera.position.x, 1, camera.position.z);
+	// 	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+    //
+	// 	glDisable(GL_LIGHTING);
+	// 	glColor3f(1, 1, 0.6);
+	// 	glutSolidSphere(0.4, 12, 8);
+	// 	glEnable(GL_LIGHTING);
+    //
+    // glPopMatrix();
 
     /* Draw test trees, TODO: put them in the scenegraph later */
-    /* Tree 1 */
-    glPushMatrix();
-        //glTranslatef(0.5, 0, -0.5);
-        //glRotatef(0, 0, 1, 0);
-        drawModel(testModel, FULL);
-    glPopMatrix();
-    /* Tree 2 */
-    glPushMatrix();
-        glTranslatef(-2, -0.25, 2.5);
-        glScalef(1, 1, 1);
-        glRotatef(70, 0, 1, 0);
-        drawModel(tree, FULL);
-    glPopMatrix();
-    /* Tree 3 */
-    glPushMatrix();
-        glTranslatef(-9, -0.5, -7.5);
-        glScalef(1.2, 1.2, 1.2);
-        glRotatef(130, 0, 1, 0);
-        drawModel(tree, FULL);
-    glPopMatrix();
+    // glPushMatrix();
+    //     //glTranslatef(0.5, 0, -0.5);
+    //     //glRotatef(0, 0, 1, 0);
+    //     drawModel(testModel, FULL);
+    // glPopMatrix();
+    // /* Tree 1 */
+    // glPushMatrix();
+    //     glTranslatef(-2, -0.25, 2.5);
+    //     glScalef(1, 1, 1);
+    //     glRotatef(70, 0, 1, 0);
+    //     drawModel(tree, FULL);
+    // glPopMatrix();
+    // /* Tree 2 */
+    // glPushMatrix();
+    //     glTranslatef(-9, -0.5, -7.5);
+    //     glScalef(1.2, 1.2, 1.2);
+    //     glRotatef(130, 0, 1, 0);
+    //     drawModel(tree, FULL);
+    // glPopMatrix();
+
+    //glPushMatrix();
+        drawDisplayListModel(levelMain);
+        drawDisplayListModel(levelDecor);
+    //glPopMatrix();
+
 
     glDisable(GL_LIGHTING);
 
@@ -144,16 +188,18 @@ void displayScene() {
     calculateInput();
 
 	/* Get aim hit */
-	Vec3f* hit = aimHit();
-	glPushMatrix();
-		glTranslatef(hit->x, hit->y, hit->z);
-		glColor3f(1, 0, 0);
-		glutWireSphere(0.2, 12, 8);
-	glPopMatrix();
-	printf("hit cords: %f %f %f\n", hit->x, hit->y, hit->z);
-	deleteVec3f(hit);
+	// Vec3f* hit = aimHit();  /* TODO: for some reason it glitches the mouse look */
+	// glPushMatrix();
+	// 	glTranslatef(hit->x, hit->y, hit->z);
+	// 	glColor3f(1, 0, 0);
+	// 	glutWireSphere(0.2, 12, 8);
+	// glPopMatrix();
+	// //printf("hit cords: %f %f %f\n", hit->x, hit->y, hit->z);
+	// deleteVec3f(hit);
 
-    glutSwapBuffers();
+
+    glFlush();
+    //glutSwapBuffers();
 }
 
 void drawObjects() {
@@ -176,7 +222,7 @@ void drawObjects() {
     }
 
     /* Draw scene graph */
-    drawSceneObjects(root);
+    //drawSceneObjects(root);
 }
 
 void drawSceneObjects(Object* object) {
@@ -350,7 +396,7 @@ void drawModelCombined(Model model) {
 	drawModelWireframe(model);
 }
 
-void drawModel(Model model, ModelMode mode) {
+void drawRawModel(Model model, ModelMode mode) {
     if (mode == POINTS) {
         /* Draw triangle points */
 		drawModelPoints(model);
@@ -371,4 +417,8 @@ void drawModel(Model model, ModelMode mode) {
 		drawModelCombined(model);
 	}
 	/* TODO: else error check unknown enum */
+}
+
+void drawDisplayListModel(Model model) {
+    glCallList(model.displayListID);
 }

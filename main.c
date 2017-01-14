@@ -23,6 +23,9 @@ int    windowWidth;
 int    windowHeight;
 float  aspectRatio;
 
+long currentTime;
+int  deltaTime;
+
 Camera camera;
 
 Object** objects;
@@ -35,9 +38,13 @@ float randAxis[150];
 Object* root;
 
 /* Models used */
+Model levelMain;
+Model levelDecor;
+Model skyModel;
+
 Model testModel;
 Model tree;
-Model skySphere;
+Model skySphere;    /* TODO: delete this */
 
 int main(int argc, char** argv) {
 

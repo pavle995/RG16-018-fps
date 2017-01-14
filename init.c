@@ -20,13 +20,17 @@ void glutSetOption ( GLenum eWhat, int value );
 void initGlut() {
     /* Initialize GLUT */
     glutInit(argumentCount, arguments);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE); // | GLUT_MULTISAMPLE
+    glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_SINGLE | GLUT_MULTISAMPLE); // | GLUT_MULTISAMPLE
 
     /* Create the window in the center of the screen */
     glutInitWindowPosition(glutGet(GLUT_SCREEN_WIDTH)  /2 - windowWidth  /2,
                            glutGet(GLUT_SCREEN_HEIGHT) /2 - windowHeight /2);
     glutInitWindowSize(windowWidth, windowHeight);
     glutCreateWindow(windowName);
+
+    /* Get the current passed time */
+    currentTime = glutGet(GLUT_ELAPSED_TIME);
+    deltaTime   = 0;
 
     /* Register GLUT callback functions */
     glutKeyboardFunc(keyboardBasicPress);
@@ -42,7 +46,7 @@ void initGlut() {
     glutIgnoreKeyRepeat(1);
     glutSetCursor(GLUT_CURSOR_NONE);
 
-	//glutSetOption(GLUT_MULTISAMPLE, 8);
+	glutSetOption(GLUT_MULTISAMPLE, 4);
 }
 
 void startGlut() {
@@ -61,8 +65,8 @@ void initSky() {
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // GL_LINEAR
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // GL_LIENAR
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // GL_LINEAR
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // GL_LIENAR
 	if (image->dataFormat == FormatRGB) {
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
 					 image->width, image->height, 0,
@@ -164,7 +168,7 @@ void initWorld() {
     tmpTranslation = createVec3f(0, 0, 0);
     tmpRotation    = createVec3f(0, 0, 0);
     tmpScale       = createVec3f(10, 5, 10);
-    objects[0] = createObject(tmpTranslation, tmpRotation, tmpScale, drawSkySphere);
+    objects[0] = createObject(tmpTranslation, tmpRotation, tmpScale, drawEmpty);
 
     /* Ground object */
     // setVec3f(tmpTranslation, 0, 0, 0);
@@ -201,9 +205,12 @@ void initWorld() {
     /* Root object */
     loadScene(&root, "scene");
     //testModel = loadModel("models/monkey.obj");
-    testModel = loadModel("models/test.obj");
-	tree = loadModel("models/tree_v2.obj");
-	skySphere = loadModel("models/skySphere.obj");
+    //testModel = loadModel("models/test.obj");
+	//tree = loadModel("models/tree_v2.obj");
+	//skySphere = loadModel("models/skySphere.obj");
+	levelMain  = loadModel("models/levelMain.obj");
+    levelDecor = loadModel("models/levelDecor.obj");
+    skyModel   = loadModel("models/skySphere.obj");
 
     // setVec3f(tmpTranslation,  2, 2, 2);
     // setVec3f(tmpRotation,     0,   0,   0);

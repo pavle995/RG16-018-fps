@@ -56,12 +56,13 @@ typedef struct Material {
 } Material;
 
 typedef struct Model {
-    Triangle* triangles;
-    Vertex*   verticies;
-    Material* materials;
-    int       numberOfTriangles;
-    int       numberOfVerticies;
-    int       numberOfMaterials;
+    Triangle*    triangles;
+    Vertex*      verticies;
+    Material*    materials;
+    int          numberOfTriangles;
+    int          numberOfVerticies;
+    int          numberOfMaterials;
+    unsigned int displayListID;
 } Model;
 
 /** Create a vector structure with 3 floats */
