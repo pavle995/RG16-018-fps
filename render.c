@@ -3,6 +3,7 @@
 int  numberOfFrames = 0;
 long lastTime = 0;
 long lastFpsTime = 0;
+int  framesPerSecondDisplay = 0;
 
 void resizeWindow(int width, int height) {
     windowHeight = height;
@@ -37,7 +38,8 @@ Vec3f* aimHit() {
 	glReadPixels(windowWidth / 2, windowHeight / 2,
 					1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &dist);
     /* TODO: Distance is aproximated, a very bad thing, FIX THIS!!! */
-	dist = (1 / (1 - dist)) / 130;
+    /* FIXME: Find another way to do this (selection buffer render??) */
+	dist = (1 / (1 - dist)) / 130; /* TODO: It's not a linear function */
 	//printf("dist: %f\n", dist);
 
 	distX = camera.look.x * dist;
@@ -68,7 +70,6 @@ Vec3f* aimHit() {
 				  &(z));
 
 
-
 	hit->x = (float) x + distX;
 	hit->y = (float) y + distY;
 	hit->z = (float) z + distZ;
@@ -93,11 +94,12 @@ void displayScene() {
 	numberOfFrames++;
 	if (currentTime - lastFpsTime > 1000) {
         float framesPerSecond = numberOfFrames * 1000.0 / (currentTime - lastFpsTime);
-		printf("FPS: %4.2f\n", framesPerSecond);
+        framesPerSecondDisplay = framesPerSecond;
         lastFpsTime = currentTime;
 		numberOfFrames = 0;
 	}
 
+    /* TODO: Remove this old scene debug rotation */
     if (root != NULL)
         root->rotation.y += (0.05 * deltaTime);
 
@@ -129,7 +131,11 @@ void displayScene() {
     glPopMatrix();
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    drawCoordinateSystem();
+    if (visualDebug) {
+        drawCoordinateSystem();
+        drawLevelGrid(levelGrid);
+        //drawLevelGraph(levelGraph, levelGrid);
+    }
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -175,17 +181,18 @@ void displayScene() {
     //     drawModel(tree, FULL);
     // glPopMatrix();
 
-    //glPushMatrix();
+    /* TODO: Stop the camera from cliping through the walls */
+
+    /* Draw level models */
+    glPushMatrix();
+        glTranslatef(-1.5, 0, -2.5);
         drawDisplayListModel(levelMain);
         drawDisplayListModel(levelDecor);
-    //glPopMatrix();
-
+    glPopMatrix();
 
     glDisable(GL_LIGHTING);
 
     drawObjects();
-
-    calculateInput();
 
 	/* Get aim hit */
 	// Vec3f* hit = aimHit();  /* TODO: for some reason it glitches the mouse look */
@@ -197,6 +204,94 @@ void displayScene() {
 	// //printf("hit cords: %f %f %f\n", hit->x, hit->y, hit->z);
 	// deleteVec3f(hit);
 
+    /* Draw 2D HUD */
+    setDrawing2D();
+
+    /* Draw the crosshair TODO: Put this in a separate function */
+    /* Crosshair Shadow */
+	glLineWidth(4);
+	glColor3f(0.1, 0.1, 0.1);
+	glBegin(GL_LINES);
+		/* Up */
+		glVertex2f(0, 0.017);
+		glVertex2f(0, 0.053);
+
+		/* Down */
+		glVertex2f(0, -0.017);
+		glVertex2f(0, -0.053);
+
+		/* Left */
+		glVertex2f(-0.017, 0);
+		glVertex2f(-0.053 / aspectRatio, 0);
+
+		/* Right */
+		glVertex2f( 0.017, 0);
+	    glVertex2f( 0.053 / aspectRatio, 0);
+	glEnd();
+	glLineWidth(1);
+
+	/* Crosshair */
+	glLineWidth(2);
+	glColor3f(1, 1, 1);
+	glBegin(GL_LINES);
+		/* Up */
+		glVertex2f(0, 0.02);
+		glVertex2f(0, 0.05);
+
+		/* Down */
+		glVertex2f(0, -0.02);
+		glVertex2f(0, -0.05);
+
+		/* Left */
+		glVertex2f(-0.02, 0);
+		glVertex2f(-0.05 / aspectRatio, 0);
+
+		/* Right */
+		glVertex2f( 0.02,  0);
+		glVertex2f( 0.05 / aspectRatio,  0);
+	glEnd();
+
+
+    /* Draw text on the screen */
+    setDrawing2DText();
+    glColor3f(0.8, 0.8, 0.3);
+
+    char tmpString[100];
+
+    sprintf(tmpString, "FPS: %d", framesPerSecondDisplay);
+    drawTextLine(10, 10, tmpString);
+    drawTextLine(10, 40, "Press");
+    glColor3f(0.8, 0.2, 0.2);
+    drawTextLine(62, 40, "h");
+    glColor3f(0.8, 0.8, 0.3);
+    drawTextLine(78, 40, "for debug details");
+
+    if (visualDebug) {
+        /* Draw a transparent background quad */
+        glEnable(GL_BLEND);
+            glColor4f(0.1, 0.1, 0.3, 0.4);
+            glRecti(45, 75, 430, 200);
+        glDisable(GL_BLEND);
+        glColor3f(0.8, 0.8, 0.3);
+
+        /* Write debug information */
+        sprintf(tmpString, "Camera position:  (%5.2f    %5.2f    %5.2f)", camera.position.x, camera.position.y, camera.position.z);
+        drawTextLine(50, 80, tmpString);
+        sprintf(tmpString, "Camera rotation:  (%5.2f    %5.2f    %5.2f)", camera.rotation.x, camera.rotation.y, camera.rotation.z);
+        drawTextLine(50, 105, tmpString);
+        sprintf(tmpString, "Camera look:        (%5.2f    %5.2f    %5.2f)", camera.look.x, camera.look.y, camera.look.z);
+        drawTextLine(50, 130, tmpString);
+
+        int currentX = getXCell(camera.position.x);
+        int currentZ = getZCell(camera.position.z);
+        sprintf(tmpString, "Grid location:  (%d  %d)", currentX, currentZ);
+        drawTextLine(50, 170, tmpString);
+    }
+
+    /* Return to the 3D */
+    setDrawing3D();
+
+    calculateInput();
 
     glFlush();
     //glutSwapBuffers();
@@ -311,7 +406,7 @@ void drawModelFull(Model model) {
 
     glEnable(GL_RESCALE_NORMAL); // TODO: fix scaling affecting normals
 
-    glEnable(GL_BLEND);
+    //glEnable(GL_BLEND);
 	glEnable(GL_TEXTURE_2D);
 
 	testErrors("gl enables");
@@ -374,8 +469,8 @@ void drawModelFull(Model model) {
 			testErrors("gl end");
 	}
 
-    glDisable(GL_BLEND);
-		testErrors("gl Disable blend");
+    //glDisable(GL_BLEND);
+	//	testErrors("gl Disable blend");
     glDisable(GL_TEXTURE_2D);
 		testErrors("gl Disable texture 2D");
 
@@ -421,4 +516,86 @@ void drawRawModel(Model model, ModelMode mode) {
 
 void drawDisplayListModel(Model model) {
     glCallList(model.displayListID);
+}
+
+void setDrawing2D() {
+    /* Save 3D projection matrix */
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+        /* Save 3D modelview matrix */
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadIdentity();
+            /* Stop using z-buffer (2D HUD/GUI is over other 3D objects) */
+            glDisable(GL_DEPTH_TEST);
+}
+
+void setDrawing2DText() {
+            /* Set the projection matrix to be easily usable by direct pixel coordinates */
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            gluOrtho2D(0, windowWidth, windowHeight, 0);
+            /* Clear transformations */
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+}
+
+void setDrawing3D() {
+            /* Use the z-buffer again for 3D objects */
+            glEnable(GL_DEPTH_TEST);
+        /* Restore old 3D modelview matrix */
+        glPopMatrix();
+        glMatrixMode(GL_PROJECTION);
+    /* Restore old 3D projection matrix */
+    glPopMatrix();
+    /* Set the modelview matrix as the active matrix */
+    glMatrixMode(GL_MODELVIEW);
+}
+
+void drawText(float x, float y, const char* string, int lineLength) {
+    char* c;
+    int offsetY = 18;   /* Fixed size by the used GLUT font */
+    glRasterPos3f(x, y + offsetY, 0);
+    int newLinePos = 0;
+    int currentPos = 0;
+    /* Draw lines with maximum length (and then go to the new line) */
+    if (lineLength > 0) {
+        for (c = (char*)string; *c != '\0'; c++) {
+            if ((*c == '\n') || (currentPos == lineLength)) {
+                newLinePos += 20;
+                glRasterPos3f(x, y + offsetY + newLinePos, 0);
+                currentPos = 0;
+            }
+            /* Don't draw newline character (it would be drawn as a ' ' character)*/
+            if (*c != '\n')
+                glutBitmapCharacter(font, *c);
+            currentPos++;
+        }
+    }
+    /* If the line length is 0, there is no line length limit */
+    else if (lineLength == 0) {
+        for (c = (char*)string; *c != '\0'; c++) {
+            if (*c == '\n') {
+                newLinePos += 20;
+                glRasterPos3f(x, y + offsetY + newLinePos, 0);
+            }
+            if (*c != '\n')
+                glutBitmapCharacter(font, *c);
+        }
+    }
+}
+
+void drawTextLines(float x, float y, const char* string) {
+    drawText(x, y, string, 0);
+}
+
+void drawTextLine(float x, float y, const char* string) {
+    char* c;
+    int offsetY = 18;
+    glRasterPos3f(x, y + offsetY, 0);
+    for (c = (char*)string; *c != '\0'; c++) {
+        if (*c != '\n')
+            glutBitmapCharacter(font, *c);
+    }
 }

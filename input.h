@@ -38,4 +38,8 @@ void keyboardSpecialPress(int key, int mouseX, int mouseY);
 /** Handles special keyboard character release key states */
 void keyboardSpecialRelease(int key, int mouseX, int mouseY);
 
+int getXCell(float x);
+
+int getZCell(float z);
+
 #endif

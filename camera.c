@@ -10,7 +10,7 @@ void initCamera() {
     camera.rotation.z = 0.0;
 
     camera.fov      = 60.0;
-    camera.clipNear = 0.01;
+    camera.clipNear = 0.001;
     camera.clipFar  = 200.0;
 }
 

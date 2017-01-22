@@ -1,10 +1,14 @@
 #ifndef DRAWSHAPES_H
 #define DRAWSHAPES_H
 
-#include "render.h"
-
 #include <GL/glut.h>
 #include <GL/gl.h>
+
+#include "render.h"
+#include "levelGrid.h"
+
+extern Grid*  levelGrid;
+//extern Graph* levelGraph;
 
 /** Draw simple ground quad - for testing purposes */
 void drawGround();
@@ -26,5 +30,9 @@ void drawCoordinateSystem();
 
 /** Draw a simple wireframe sky sphere - for testing purposes */
 void drawSkySphere();
+
+void drawLevelGrid(Grid* grid);
+
+//void drawLevelGraph(Graph* graph, Grid* grid);
 
 #endif

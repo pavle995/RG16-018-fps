@@ -14,6 +14,7 @@
 #include "render.h"
 #include "sceneLoader.h"
 #include "modelLoader.h"
+#include "levelGrid.h"
 
 #include "imageTGA.h"
 
@@ -33,6 +34,9 @@ extern float randAxis[];
 extern Model levelMain;
 extern Model levelDecor;
 extern Model skyModel;
+
+extern Grid*  levelGrid;
+//extern Graph* levelGraph;
 
 extern Model testModel;
 extern Model tree;

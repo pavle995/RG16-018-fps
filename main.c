@@ -11,6 +11,7 @@
 #include "object.h"
 #include "camera.h"
 #include "drawShapes.h"
+#include "levelGrid.h"
 
 /* TODO: place all these global variables in a better place */
 
@@ -41,6 +42,9 @@ Object* root;
 Model levelMain;
 Model levelDecor;
 Model skyModel;
+
+Grid*  levelGrid;
+//Graph* levelGraph;
 
 Model testModel;
 Model tree;

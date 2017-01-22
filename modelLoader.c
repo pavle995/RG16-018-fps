@@ -221,14 +221,14 @@ Model loadModel(const char* filename) {
 						sscanf(line, "map_Kd %s", (tmpWord + pos));
 						glGenTextures(1, &(tmpMaterial.textureID));
 
-						printf("IMAGE: %s\n", tmpWord);
-						printf("Whole line: %s", line);
+						// printf("IMAGE: %s\n", tmpWord);
+						// printf("Whole line: %s", line);
 
 						InternalImage* image;
 						image = imageLoadTGA(tmpWord);
 
 						glBindTexture(GL_TEXTURE_2D, tmpMaterial.textureID);
-						printf("Binded texture to ID: %d\n", tmpMaterial.textureID);
+						// printf("Binded texture to ID: %d\n", tmpMaterial.textureID);
 
 						glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -518,7 +518,7 @@ unsigned int makeModelDisplayList(Model model) {
 
         glEnable(GL_RESCALE_NORMAL); // TODO: fix scaling affecting normals
 
-        glEnable(GL_BLEND);
+        //glEnable(GL_BLEND);
     	glEnable(GL_TEXTURE_2D);
 
         unsigned int oldTexture = 12345;    // Random unused number
@@ -565,7 +565,7 @@ unsigned int makeModelDisplayList(Model model) {
             glEnd();
     	}
 
-        glDisable(GL_BLEND);
+        //glDisable(GL_BLEND);
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_RESCALE_NORMAL); // TODO: fix scaling affecting normals
         glShadeModel(GL_SMOOTH);

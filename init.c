@@ -1,7 +1,11 @@
 #include "init.h"
 
+/* TODO: Clean up old and unused code in this file */
+
 unsigned int nullTexture;
 unsigned int skyTexture;
+
+void* font;
 
 void initProgram(int* argc, char** argv) {
     srand(time(0));
@@ -31,6 +35,9 @@ void initGlut() {
     /* Get the current passed time */
     currentTime = glutGet(GLUT_ELAPSED_TIME);
     deltaTime   = 0;
+
+    /* Set the GLUT font */
+    font = GLUT_BITMAP_HELVETICA_18;
 
     /* Register GLUT callback functions */
     glutKeyboardFunc(keyboardBasicPress);
@@ -120,7 +127,7 @@ void initGL() {
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //glEnable(GL_BLEND);
     glAlphaFunc(GL_GREATER, 0.001);
     glEnable(GL_ALPHA_TEST);
@@ -211,6 +218,9 @@ void initWorld() {
 	levelMain  = loadModel("models/levelMain.obj");
     levelDecor = loadModel("models/levelDecor.obj");
     skyModel   = loadModel("models/skySphere.obj");
+
+    levelGrid  = loadGrid("collision.txt");
+    //levelGraph = createGraph(levelGrid);
 
     // setVec3f(tmpTranslation,  2, 2, 2);
     // setVec3f(tmpRotation,     0,   0,   0);

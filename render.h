@@ -21,6 +21,8 @@ extern int  deltaTime;
 extern Object* root;
 extern Camera camera;
 
+extern void* font;
+
 extern Object** objects;
 extern int numberOfObjects;
 
@@ -28,6 +30,8 @@ extern Object* flyingObjects[];
 extern int numberOfFlyingObjects;
 
 extern unsigned int nullTexture;
+
+extern int visualDebug;
 
 extern Model levelMain;
 extern Model levelDecor;
@@ -57,5 +61,18 @@ void drawSceneObjects(Object* object);
 void drawRawModel(Model model, ModelMode mode);
 
 void drawDisplayListModel(Model model);
+
+void setDrawing2D();
+
+void setDrawing2DText();
+
+void setDrawing3D();
+
+void drawText(float x, float y, const char* string, int lineLength);
+
+void drawTextLines(float x, float y, const char* string);
+
+void drawTextLine(float x, float y, const char* string);
+
 
 #endif
