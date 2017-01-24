@@ -42,6 +42,7 @@ Object* root;
 Model levelMain;
 Model levelDecor;
 Model skyModel;
+Model gunModel;
 
 Grid*  levelGrid;
 //Graph* levelGraph;

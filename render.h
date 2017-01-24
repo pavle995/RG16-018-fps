@@ -32,10 +32,19 @@ extern int numberOfFlyingObjects;
 extern unsigned int nullTexture;
 
 extern int visualDebug;
+extern int moving;
+extern int movingForward;
+extern int movingBackward;
+extern int movingLeftSide;
+extern int movingRightSide;
+
+extern float mouseSideWave;
+extern float mouseUpWave;
 
 extern Model levelMain;
 extern Model levelDecor;
 extern Model skyModel;
+extern Model gunModel;
 
 extern Model testModel;
 extern Model tree;

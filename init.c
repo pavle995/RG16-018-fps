@@ -44,6 +44,7 @@ void initGlut() {
     glutKeyboardUpFunc(keyboardBasicRelease);
     glutSpecialFunc(keyboardSpecialPress);
     glutSpecialUpFunc(keyboardSpecialRelease);
+    glutMotionFunc(mouseMove);
     glutPassiveMotionFunc(mouseMove);
     glutDisplayFunc(displayScene);
     glutIdleFunc(displayScene);
@@ -218,6 +219,7 @@ void initWorld() {
 	levelMain  = loadModel("models/levelMain.obj");
     levelDecor = loadModel("models/levelDecor.obj");
     skyModel   = loadModel("models/skySphere.obj");
+    gunModel   = loadModel("models/completeGunModel.obj");
 
     levelGrid  = loadGrid("collision.txt");
     //levelGraph = createGraph(levelGrid);

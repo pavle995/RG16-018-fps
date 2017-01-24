@@ -9,6 +9,14 @@
 
 extern struct Camera camera;
 
+extern long currentTime;
+
+extern int moving;
+extern int movingForward;
+extern int movingBackward;
+extern int movingLeftSide;
+extern int movingRightSide;
+
 /* Camera properties */
 typedef struct Camera {
     Vec3f position;

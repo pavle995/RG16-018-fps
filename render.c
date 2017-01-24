@@ -5,6 +5,8 @@ long lastTime = 0;
 long lastFpsTime = 0;
 int  framesPerSecondDisplay = 0;
 
+float crosshairMovementOffset;
+
 void resizeWindow(int width, int height) {
     windowHeight = height;
     windowWidth  = width;
@@ -91,6 +93,8 @@ void displayScene() {
     lastTime    = currentTime;
 
     /* Calculate frames per second */
+    /* TODO: Test this again, feels like the fps is far less than the counter says,
+             but it could be cause of the choppy mouse input */
 	numberOfFrames++;
 	if (currentTime - lastFpsTime > 1000) {
         float framesPerSecond = numberOfFrames * 1000.0 / (currentTime - lastFpsTime);
@@ -190,9 +194,82 @@ void displayScene() {
         drawDisplayListModel(levelDecor);
     glPopMatrix();
 
-    glDisable(GL_LIGHTING);
-
     drawObjects();
+
+    /* Draw gun model in front of the camera */
+    /* Clear the depth buffer so the gun doesn't clip in the wall */
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    /* Calculate gun animations */
+    float animationParameter = currentTime / 80;
+    float waveZ = 0;
+    float waveY = 0;
+    float waveX = 0;
+
+    if (moving) {
+        if (movingForward) {
+            waveZ =  cos(animationParameter) * 1.2;
+            waveX =  sin(animationParameter) * 1.6;
+        } else if (movingBackward || movingLeftSide) {
+            waveZ = -cos(animationParameter)  * 1.2;
+            waveX = -sin(animationParameter)  * 1.6;
+        }
+
+        if (movingRightSide) {
+            waveY =  sin(animationParameter) * 4.2;
+        } else if (movingLeftSide) {
+            waveY = -sin(animationParameter) * 4.2;
+        }
+    }
+
+    if (mouseSideWave > 0) {
+        mouseSideWave -= 1 / animationParameter;
+        if (mouseSideWave < 0.0001)
+            mouseSideWave = 0;
+    } else if (mouseSideWave < 0) {
+        mouseSideWave += 1 / animationParameter;
+        if (mouseSideWave > 0.0001)
+            mouseSideWave = 0;
+    }
+    mouseSideWave /= 1.1;   // TODO: Animations need to depend on passed time!
+
+    if (mouseUpWave > 0) {
+        mouseUpWave -= 1 / animationParameter;
+        if (mouseUpWave < 0.0001)
+            mouseUpWave = 0;
+    } else if (mouseUpWave < 0) {
+        mouseUpWave += 1 / animationParameter;
+        if (mouseUpWave > 0.0001)
+            mouseUpWave = 0;
+    }
+    mouseUpWave /= 1.05;
+
+    /* Draw the gun */
+    glPushMatrix();
+        glTranslatef(camera.position.x, camera.position.y, camera.position.z);
+        /* Rotate the gun left-right */
+        glRotatef(-camera.rotation.x - 90, 0, 1, 0);
+        /* Rotate the gun up-down */
+        glRotatef(-(camera.rotation.y - 90) / 1.2, 1, 0, 0);
+        /* Offset the gun held position */
+        glTranslatef(0.15, -0.1, -0.35); // right-left, down-up, forward-backward
+        /* Add up-down gun pointing effect */
+        glRotatef(-(camera.rotation.y - 90) * 0.2, 1, 0, 0);
+
+        /* Add gun aim waving effect */
+        glRotatef(-mouseSideWave, 0, 1, 0);
+        glRotatef(-mouseUpWave,   1, 0, 0);
+
+        /* Add gun movement waving effect */
+        glRotatef(waveX, 1, 0, 0);
+        glRotatef(waveY, 0, 1, 0);
+        glRotatef(waveZ, 0, 0, 1);
+
+        glColor3f(1.0, 1.0, 1.0);
+        drawDisplayListModel(gunModel);
+    glPopMatrix();
+
+    glDisable(GL_LIGHTING);
 
 	/* Get aim hit */
 	// Vec3f* hit = aimHit();  /* TODO: for some reason it glitches the mouse look */
@@ -208,25 +285,41 @@ void displayScene() {
     setDrawing2D();
 
     /* Draw the crosshair TODO: Put this in a separate function */
+    float maxCrosshairOffset = 0.1;
+    float crosshairGrowth = 0.8;
+    float crosshairChangeSpeed = deltaTime * 0.0008;
+
+    if (moving) {
+        crosshairMovementOffset += crosshairChangeSpeed;
+        if (crosshairMovementOffset > maxCrosshairOffset)
+            crosshairMovementOffset = maxCrosshairOffset;
+    }
+    else {
+        if (crosshairMovementOffset > 0)
+            crosshairMovementOffset -= crosshairChangeSpeed;
+        if (crosshairMovementOffset < 0)
+            crosshairMovementOffset = 0;
+    }
+
     /* Crosshair Shadow */
 	glLineWidth(4);
 	glColor3f(0.1, 0.1, 0.1);
 	glBegin(GL_LINES);
 		/* Up */
-		glVertex2f(0, 0.017);
-		glVertex2f(0, 0.053);
+		glVertex2f(0, 0.017 + crosshairMovementOffset * crosshairGrowth);
+		glVertex2f(0, 0.053 + crosshairMovementOffset);
 
 		/* Down */
-		glVertex2f(0, -0.017);
-		glVertex2f(0, -0.053);
+		glVertex2f(0, -0.017 - crosshairMovementOffset * crosshairGrowth);
+		glVertex2f(0, -0.053 - crosshairMovementOffset);
 
 		/* Left */
-		glVertex2f(-0.017, 0);
-		glVertex2f(-0.053 / aspectRatio, 0);
+		glVertex2f(-0.017 - crosshairMovementOffset * crosshairGrowth, 0);
+		glVertex2f(-0.053 / aspectRatio - crosshairMovementOffset, 0);
 
 		/* Right */
-		glVertex2f( 0.017, 0);
-	    glVertex2f( 0.053 / aspectRatio, 0);
+		glVertex2f( 0.017 + crosshairMovementOffset * crosshairGrowth, 0);
+	    glVertex2f( 0.053 / aspectRatio + crosshairMovementOffset, 0);
 	glEnd();
 	glLineWidth(1);
 
@@ -235,20 +328,20 @@ void displayScene() {
 	glColor3f(1, 1, 1);
 	glBegin(GL_LINES);
 		/* Up */
-		glVertex2f(0, 0.02);
-		glVertex2f(0, 0.05);
+		glVertex2f(0, 0.02 + crosshairMovementOffset * crosshairGrowth);
+		glVertex2f(0, 0.05 + crosshairMovementOffset);
 
 		/* Down */
-		glVertex2f(0, -0.02);
-		glVertex2f(0, -0.05);
+		glVertex2f(0, -0.02 - crosshairMovementOffset * crosshairGrowth);
+		glVertex2f(0, -0.05 - crosshairMovementOffset);
 
 		/* Left */
-		glVertex2f(-0.02, 0);
-		glVertex2f(-0.05 / aspectRatio, 0);
+		glVertex2f(-0.02 - crosshairMovementOffset * crosshairGrowth, 0);
+		glVertex2f(-0.05 / aspectRatio - crosshairMovementOffset, 0);
 
 		/* Right */
-		glVertex2f( 0.02,  0);
-		glVertex2f( 0.05 / aspectRatio,  0);
+		glVertex2f( 0.02 + crosshairMovementOffset * crosshairGrowth,  0);
+		glVertex2f( 0.05 / aspectRatio + crosshairMovementOffset,  0);
 	glEnd();
 
 

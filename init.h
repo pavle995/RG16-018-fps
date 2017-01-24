@@ -34,6 +34,7 @@ extern float randAxis[];
 extern Model levelMain;
 extern Model levelDecor;
 extern Model skyModel;
+extern Model gunModel;
 
 extern Grid*  levelGrid;
 //extern Graph* levelGraph;

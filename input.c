@@ -9,14 +9,39 @@ int key_down  = 0;
 int key_left  = 0;
 int key_right = 0;
 
+int moving = 0;
+int movingForward   = 0;
+int movingBackward  = 0;
+int movingLeftSide  = 0;
+int movingRightSide = 0;
+
+float mouseSideWave = 0;
+float mouseUpWave   = 0;
+
 int visualDebug = 0;
 
 void mouseLook(int mouseX, int mouseY) {
     float sensitivity = 0.2;
 
+    /* TODO: Mouse look feels choppy, find the bug later */
+
 	/* How much the mouse moved */
 	int dx = mouseX - windowWidth  / 2;
 	int dy = mouseY - windowHeight / 2;
+
+    /* Calculate gun waving */
+    mouseSideWave += dx / 5;
+    mouseUpWave   += dy / 5;
+
+    if (mouseSideWave > 12)
+        mouseSideWave = 12;
+    else if (mouseSideWave < -12)
+        mouseSideWave = -12;
+
+    if (mouseUpWave > 8)
+        mouseUpWave = 8;
+    else if (mouseUpWave < -8)
+        mouseUpWave = -8;
 
 	/* Add mouse sensitivity and fix aspect ratio diference */
     camera.rotation.x = camera.rotation.x + (dx * sensitivity);
@@ -310,6 +335,9 @@ void checkCollisionMove(float fromX, float fromZ,
         printf("pos: downRightPos\n");
     */
 
+    if (camera.position.x != newX || camera.position.z != newZ)
+        moving = 1;
+
     camera.position.x = newX;
     camera.position.z = newZ;
 }
@@ -318,10 +346,17 @@ void calculateInput() {
     float step = 0.0035 * deltaTime;
     float turn = 0.15 * deltaTime;
 
+    moving = 0;
+    movingForward   = 0;
+    movingBackward  = 0;
+    movingLeftSide  = 0;
+    movingRightSide = 0;
+
     Vec3f move;
 
     /* Move camera forward */
     if (key_w == 1 && key_s == 0) {
+        movingForward = 1;
         move.x = camera.position.x + camera.look.x * step;
         move.y = camera.position.y + camera.look.y * step;
         move.z = camera.position.z + camera.look.z * step;
@@ -330,6 +365,8 @@ void calculateInput() {
 
     /* Move camera backward */
     if (key_s == 1 && key_w == 0) {
+        if (movingForward == 0)
+            movingBackward = 1;
         move.x = camera.position.x - camera.look.x * step;
         move.y = camera.position.y - camera.look.y * step;
         move.z = camera.position.z - camera.look.z * step;
@@ -338,6 +375,7 @@ void calculateInput() {
 
     /* Move camera to the left side */
     if (key_a == 1 && key_d == 0) {
+        movingLeftSide = 1;
         move.x = camera.position.x + camera.look.z * step;
         move.y = camera.position.y;
         move.z = camera.position.z - camera.look.x * step;
@@ -346,6 +384,8 @@ void calculateInput() {
 
     /* Move camera to the right side */
     if (key_d == 1 && key_a == 0) {
+        if (movingLeftSide == 0)
+            movingRightSide = 1;
         move.x = camera.position.x - camera.look.z * step;
         move.y = camera.position.y;
         move.z = camera.position.z + camera.look.x * step;
@@ -355,22 +395,37 @@ void calculateInput() {
     /* Turn the camera up */
     if (key_up == 1) {
         camera.rotation.y -= turn;
+        mouseUpWave -= 1.5;
     }
 
     /* Turn the camera down */
     if (key_down == 1) {
         camera.rotation.y += turn;
+        mouseUpWave += 1.5;
     }
 
     /* Turn the camera left */
     if (key_left == 1) {
         camera.rotation.x -= turn;
+        mouseSideWave -= 1.5;
     }
 
     /* Turn the camera right */
     if (key_right == 1) {
         camera.rotation.x += turn;
+        mouseSideWave += 1.5;
     }
+
+    /* Calculate gun waving */
+    if (mouseSideWave > 12)
+        mouseSideWave = 12;
+    else if (mouseSideWave < -12)
+        mouseSideWave = -12;
+
+    if (mouseUpWave > 8)
+        mouseUpWave = 8;
+    else if (mouseUpWave < -8)
+        mouseUpWave = -8;
 }
 
 void keyboardBasicPress(unsigned char key, int mouseX, int mouseY) {

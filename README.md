@@ -48,4 +48,4 @@ Kompilacija preko Makefile-a komandom: "make"<br/>
 Potrebne su biblioteke OpenGL i freeglut
 
 ##Izvrsavanje
-Program se izvrsava pokretanjem "./program"
+Program se pokrece izvrsavanjem "./program"
